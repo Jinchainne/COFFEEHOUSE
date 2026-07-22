@@ -11,10 +11,10 @@ const navItems = [
     { label: 'Split Bill', path: '/split' },
     { label: 'Remittance', path: '/remit' },
   ]},
-  { label: 'About Global Payments', path: '#' },
-  { label: 'News', path: '#' },
-  { label: 'Help', path: '#' },
-  { label: 'Partners', path: '#' },
+  { label: 'About Global Payments', path: '#about' },
+  { label: 'News', path: '#news' },
+  { label: 'Help', path: '#help' },
+  { label: 'Partners', path: '#partners' },
 ];
 
 export default function Navbar() {

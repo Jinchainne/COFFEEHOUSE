@@ -24,16 +24,16 @@ const categories = [
 ];
 
 const recommendedServices = [
-  { label: 'AI Financial Assistant', icon: '🤖', color: 'border-blue-400 text-blue-600' },
-  { label: 'Expense Tracker', icon: '📊', color: 'border-emerald-400 text-emerald-600' },
-  { label: 'Savings Goals', icon: '🎯', color: 'border-amber-400 text-amber-600' },
-  { label: 'Budget Planner', icon: '📋', color: 'border-violet-400 text-violet-600' },
-  { label: 'Group Fund', icon: '👥', color: 'border-pink-400 text-pink-600' },
-  { label: 'Quick Loan', icon: '💰', color: 'border-orange-400 text-orange-600' },
-  { label: 'FX Converter', icon: '🌍', color: 'border-cyan-400 text-cyan-600' },
-  { label: 'Payment Reminders', icon: '🔔', color: 'border-indigo-400 text-indigo-600' },
-  { label: 'Nano Payments', icon: '⚡', color: 'border-sky-400 text-sky-600' },
-  { label: 'Bill Payments', icon: '🧾', color: 'border-rose-400 text-rose-600' },
+  { label: 'AI Financial Assistant', icon: '🤖', color: 'border-blue-400 text-blue-600', action: 'ai' },
+  { label: 'Expense Tracker', icon: '📊', color: 'border-emerald-400 text-emerald-600', action: 'history' },
+  { label: 'Savings Goals', icon: '🎯', color: 'border-amber-400 text-amber-600', action: '#' },
+  { label: 'Budget Planner', icon: '📋', color: 'border-violet-400 text-violet-600', action: 'history' },
+  { label: 'Group Fund', icon: '👥', color: 'border-pink-400 text-pink-600', action: 'split' },
+  { label: 'Quick Loan', icon: '💰', color: 'border-orange-400 text-orange-600', action: '#' },
+  { label: 'FX Converter', icon: '🌍', color: 'border-cyan-400 text-cyan-600', action: 'remit' },
+  { label: 'Payment Reminders', icon: '🔔', color: 'border-indigo-400 text-indigo-600', action: '#' },
+  { label: 'Nano Payments', icon: '⚡', color: 'border-sky-400 text-sky-600', action: 'send' },
+  { label: 'Bill Payments', icon: '🧾', color: 'border-rose-400 text-rose-600', action: 'send' },
 ];
 
 const services = [
@@ -152,8 +152,12 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
             {categories.map((cat, i) => (
-              <button key={i} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                cat.active ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+              <button key={i} onClick={() => {
+                if (cat.label === 'Payments') navigate('/send');
+                else if (cat.label === 'Transfers') navigate('/remit');
+                else if (cat.label === 'Travel') navigate('/remit');
+              }} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
+                cat.active ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 hover:border hover:border-slate-200'
               }`}>
                 <span>{cat.icon}</span> {cat.label}
               </button>
@@ -167,7 +171,13 @@ export default function Dashboard() {
         <div className="max-w-7xl">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {recommendedServices.map((svc, i) => (
-              <button key={i} className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full border-2 bg-white text-sm font-medium whitespace-nowrap hover:shadow-md transition-all ${svc.color}`}>
+              <button key={i} onClick={() => {
+                if (svc.action === 'ai') document.querySelector('[data-ai-chat]')?.dispatchEvent(new MouseEvent('click'));
+                else if (svc.action === 'history') navigate('/history');
+                else if (svc.action === 'split') navigate('/split');
+                else if (svc.action === 'remit') navigate('/remit');
+                else if (svc.action === 'send') navigate('/send');
+              }} className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full border-2 bg-white text-sm font-medium whitespace-nowrap hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer ${svc.color}`}>
                 <span>{svc.icon}</span> {svc.label}
               </button>
             ))}
@@ -195,7 +205,7 @@ export default function Dashboard() {
                     </li>
                   ))}
                 </ul>
-                <button className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-colors">
+                <button onClick={() => window.dispatchEvent(new CustomEvent('open-ai-chat'))} className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-colors">
                   TRY AI ASSISTANT
                 </button>
               </div>
@@ -245,7 +255,7 @@ export default function Dashboard() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {newsItems.map((item, i) => (
-              <div key={i} className="card overflow-hidden cursor-pointer group">
+              <div key={i} className="card overflow-hidden cursor-pointer group hover:shadow-lg hover:-translate-y-1 transition-all">
                 <div className="h-36 overflow-hidden">
                   <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                 </div>

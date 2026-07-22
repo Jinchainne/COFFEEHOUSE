@@ -9,6 +9,11 @@ interface Message {
 
 export default function AIChat() {
   const [open, setOpen] = useState(false);
+
+  // Listen for external open events
+  if (typeof window !== 'undefined') {
+    window.addEventListener('open-ai-chat', () => setOpen(true));
+  }
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: "Hi! I'm your AI Financial Assistant powered by MiMo. How can I help you today?" }
   ]);
