@@ -2,7 +2,7 @@ import Header from '../components/Header';
 import { useStore } from '../hooks/useStore';
 import { Avatar, SuccessModal, useToast } from '../components/UI';
 import { formatCurrency, shortenAddress } from '../utils/format';
-import { Send as SendIcon, ArrowRight, ChevronRight, Search, Zap, Clock, Check } from 'lucide-react';
+import { Send as SendIcon, ChevronRight, Search, Zap, Clock, Check } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Send() {

@@ -1,4 +1,5 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export function StatusBadge({ status }: { status: string }) {

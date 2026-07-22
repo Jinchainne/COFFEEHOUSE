@@ -69,7 +69,7 @@ export function useStore() {
     return tx;
   }, []);
 
-  const createRemit = useCallback(async (from: string, to: string, amount: number, rate: number, country: string) => {
+  const createRemit = useCallback(async (_from: string, to: string, amount: number, rate: number, country: string) => {
     const remit: RemitTransfer = {
       id: generateId(),
       fromCurrency: 'USDC',

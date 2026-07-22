@@ -1,7 +1,7 @@
 import Header from '../../components/Header';
 import { useStore } from '../../hooks/useStore';
-import { Avatar, SuccessModal, useToast } from '../../components/UI';
-import { formatCurrency, shortenAddress } from '../../utils/format';
+import { SuccessModal, useToast } from '../../components/UI';
+import { formatCurrency } from '../../utils/format';
 import { useState } from 'react';
 import { Globe, ArrowRightLeft, Zap, Clock, Shield, TrendingUp } from 'lucide-react';
 

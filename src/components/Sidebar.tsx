@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Send, QrCode, Clock, Users, Receipt, 
-  Globe, ArrowLeftRight, Settings, Wallet, CreditCard, Landmark
+  Globe, ArrowLeftRight, Settings, Wallet, Landmark
 } from 'lucide-react';
 
 const sections = [

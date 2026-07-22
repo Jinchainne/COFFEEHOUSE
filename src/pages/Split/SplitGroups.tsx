@@ -1,6 +1,6 @@
 import Header from '../../components/Header';
 import { useStore } from '../../hooks/useStore';
-import { Avatar } from '../../components/UI';
+
 import { formatCurrency, formatTime } from '../../utils/format';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, ChevronRight, Receipt } from 'lucide-react';
@@ -39,7 +39,7 @@ export default function SplitGroups() {
 
                 {/* Members */}
                 <div className="flex items-center gap-1 mb-3">
-                  {group.members.slice(0, 4).map((m, i) => (
+                  {group.members.slice(0, 4).map((m) => (
                     <div key={m.id} className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-[9px] font-bold text-white border-2 border-white -ml-1 first:ml-0">
                       {m.name.split(' ').map(n => n[0]).join('')}
                     </div>

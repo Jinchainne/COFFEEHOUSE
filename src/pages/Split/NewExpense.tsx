@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Receipt, Users, DollarSign, Check } from 'lucide-react';
 
 export default function NewExpense() {
-  const { groups, contacts, balance } = useStore();
+  const { groups } = useStore();
   const { showToast, ToastUI } = useToast();
   const navigate = useNavigate();
   const [selectedGroup, setSelectedGroup] = useState(groups[0]?.id || '');

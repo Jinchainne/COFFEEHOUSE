@@ -1,12 +1,12 @@
 import Header from '../components/Header';
 import { useStore } from '../hooks/useStore';
-import { StatusBadge, Avatar } from '../components/UI';
+import { StatusBadge } from '../components/UI';
 import { formatCurrency, formatTime, shortenAddress } from '../utils/format';
 import { useNavigate } from 'react-router-dom';
 import {
   Send, QrCode, ArrowDownLeft, ArrowUpRight, Users, Globe,
-  Receipt, Wallet, TrendingUp, Activity, CreditCard, Banknote,
-  Zap, Shield, Clock, ChevronRight, Smartphone, Building2
+  TrendingUp, Activity, CreditCard, Banknote,
+  Zap, Shield, Smartphone, Building2
 } from 'lucide-react';
 
 export default function Dashboard() {
