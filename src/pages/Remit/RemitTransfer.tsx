@@ -131,10 +131,26 @@ export default function RemitTransfer() {
           {/* Recipient */}
           <div className="card p-4">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">Recipient Wallet</label>
-            <select value={recipient} onChange={e => setRecipient(e.target.value)} className="bg-white">
-              <option value="">Select a contact...</option>
-              {contacts.map(c => <option key={c.id} value={c.address}>{c.name} ({c.address.slice(0, 10)}...)</option>)}
-            </select>
+            <div className="space-y-3">
+              {/* Manual paste */}
+              <div>
+                <p className="text-[11px] text-slate-500 mb-1.5">Paste wallet address:</p>
+                <input
+                  value={recipient.startsWith('0x') && !contacts.find(c => c.address === recipient) ? recipient : ''}
+                  onChange={e => setRecipient(e.target.value)}
+                  placeholder="0x... paste any Arc Testnet address"
+                  className="font-mono text-sm"
+                />
+              </div>
+              {/* Or select from contacts */}
+              <div>
+                <p className="text-[11px] text-slate-500 mb-1.5">Or select a contact:</p>
+                <select value={contacts.find(c => c.address === recipient) ? recipient : ''} onChange={e => setRecipient(e.target.value)} className="bg-white">
+                  <option value="">Choose from contacts...</option>
+                  {contacts.map(c => <option key={c.id} value={c.address}>{c.name} ({c.address.slice(0, 10)}...)</option>)}
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* Transfer Summary */}
