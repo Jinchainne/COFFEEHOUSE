@@ -12,7 +12,7 @@ export interface FinanceEntry {
 
 interface AdminCtx {
   isAdmin: boolean;
-  login: (password: string) => boolean;
+  login: (password: string) => Promise<boolean>;
   logout: () => void;
   finances: FinanceEntry[];
   addFinance: (entry: Omit<FinanceEntry, 'id'>) => void;
@@ -21,8 +21,6 @@ interface AdminCtx {
   totalExpense: number;
   profit: number;
 }
-
-const ADMIN_PASSWORD = 'admin123';
 
 const AdminContext = createContext<AdminCtx | null>(null);
 
@@ -43,13 +41,22 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     } catch { return getDefaultFinances(); }
   });
 
-  const login = useCallback((password: string) => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      sessionStorage.setItem('arcbank_admin', 'true');
-      return true;
+  const login = useCallback(async (password: string): Promise<boolean> => {
+    try {
+      const resp = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (resp.ok) {
+        setIsAdmin(true);
+        sessionStorage.setItem('arcbank_admin', 'true');
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
     }
-    return false;
   }, []);
 
   const logout = useCallback(() => {

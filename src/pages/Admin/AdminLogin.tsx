@@ -16,19 +16,22 @@ export default function AdminLogin() {
     return null;
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setTimeout(() => {
-      const ok = login(password);
+    try {
+      const ok = await login(password);
       setLoading(false);
       if (ok) {
         navigate('/admin/dashboard');
       } else {
-        setError('Wrong admin password');
+        setError('Invalid password');
       }
-    }, 500);
+    } catch {
+      setLoading(false);
+      setError('Connection error. Please try again.');
+    }
   };
 
   return (
@@ -130,7 +133,7 @@ export default function AdminLogin() {
 
           <div className="mt-8 p-4 bg-slate-50 rounded-xl">
             <p className="text-xs text-slate-400 text-center">
-              Demo password: <code className="bg-white px-2 py-0.5 rounded text-slate-600 font-mono font-bold">admin123</code>
+              Contact the shop owner for admin access
             </p>
           </div>
 
