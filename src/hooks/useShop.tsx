@@ -195,6 +195,9 @@ interface ShopCtx {
   updateOrderStatus: (orderId: string, status: Order['status'], txHash?: string) => void;
   getOrderByCode: (code: string) => Order | undefined;
   cancelOrder: (orderId: string, reason: string) => void;
+  addProduct: (product: Omit<Product, 'id'>) => void;
+  updateProduct: (id: string, updates: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
 }
 
 const ShopContext = createContext<ShopCtx | null>(null);
@@ -207,6 +210,31 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
+
+  const [products, setProducts] = useState<Product[]>(() => {
+    try {
+      const saved = localStorage.getItem('arcbank_products');
+      return saved ? JSON.parse(saved) : PRODUCTS;
+    } catch { return PRODUCTS; }
+  });
+
+  const persistProducts = useCallback((updated: Product[]) => {
+    setProducts(updated);
+    localStorage.setItem('arcbank_products', JSON.stringify(updated));
+  }, []);
+
+  const addProduct = useCallback((product: Omit<Product, 'id'>) => {
+    const id = 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    persistProducts([{ ...product, id }, ...products]);
+  }, [products, persistProducts]);
+
+  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
+    persistProducts(products.map(p => p.id === id ? { ...p, ...updates } : p));
+  }, [products, persistProducts]);
+
+  const deleteProduct = useCallback((id: string) => {
+    persistProducts(products.filter(p => p.id !== id));
+  }, [products, persistProducts]);
 
   const addToCart = useCallback((product: Product) => {
     setCart(prev => {
@@ -274,9 +302,10 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   return (
     <ShopContext.Provider value={{
-      products: PRODUCTS, categories: CATEGORIES, brands: BRANDS, cart, orders,
+      products, categories: CATEGORIES, brands: BRANDS, cart, orders,
       cartTotal, cartCount, addToCart, removeFromCart, updateQuantity,
       clearCart, saveOrder, updateOrderStatus, getOrderByCode, cancelOrder,
+      addProduct, updateProduct, deleteProduct,
     }}>
       {children}
     </ShopContext.Provider>

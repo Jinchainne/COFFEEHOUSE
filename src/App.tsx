@@ -5,6 +5,7 @@ import { config } from './config/wagmi';
 import { ShopProvider } from './hooks/useShop';
 import { AdminProvider } from './hooks/useAdmin';
 import { AgentProvider } from './hooks/useAgent';
+import { SocialProvider } from './hooks/useSocial';
 import Layout from './components/Layout';
 import ShopMenu from './pages/Shop/ShopMenu';
 import ShopCheckout from './pages/Shop/ShopCheckout';
@@ -26,6 +27,7 @@ export default function App() {
           <ShopProvider>
             <AdminProvider>
               <AgentProvider>
+                <SocialProvider>
                 <Routes>
                   <Route path="/" element={<Layout />}>
                     <Route index element={<Navigate to="/shop" replace />} />
@@ -40,6 +42,7 @@ export default function App() {
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
                   <Route path="/admin/agents" element={<AgentDashboard />} />
                 </Routes>
+                </SocialProvider>
               </AgentProvider>
             </AdminProvider>
           </ShopProvider>

@@ -8,12 +8,12 @@ import {
   TrendingUp, TrendingDown, DollarSign, Package, ChefHat, Truck, Clock, Check, X, ExternalLink, MapPin
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'orders' | 'finance' | 'tax';
+type Tab = 'dashboard' | 'orders' | 'finance' | 'tax' | 'products';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { isAdmin, logout, totalExpense, profit } = useAdmin();
-  const { orders } = useShop();
+  const { orders, products, addProduct, updateProduct, deleteProduct } = useShop();
   const [tab, setTab] = useState<Tab>('dashboard');
 
   if (!isAdmin) {
@@ -46,6 +46,7 @@ export default function AdminDashboard() {
     { id: 'orders' as Tab, label: 'Orders', icon: ShoppingCart },
     { id: 'finance' as Tab, label: 'Finance', icon: Receipt },
     { id: 'tax' as Tab, label: 'Tax', icon: Calculator },
+    { id: 'products' as Tab, label: 'Products', icon: Package },
   ];
 
   return (
@@ -280,6 +281,11 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {/* ═══════ PRODUCTS ═══════ */}
+        {tab === 'products' && (
+          <ProductsTab products={products} onAdd={addProduct} onUpdate={updateProduct} onDelete={deleteProduct} />
+        )}
       </div>
     </div>
   );
@@ -412,6 +418,188 @@ function FinanceTab() {
         </table>
         {filtered.length === 0 && (
           <p className="text-center text-sm text-slate-400 py-8">No data</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════ PRODUCTS TAB ═══════
+function ProductsTab({ products, onAdd, onUpdate, onDelete }: {
+  products: any[];
+  onAdd: (p: Omit<any, 'id'>) => void;
+  onUpdate: (id: string, updates: any) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editField, setEditField] = useState<'price' | 'image' | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [form, setForm] = useState({ name: '', price: '', category: '', image: '', description: '', brand: '' });
+  const [filterCat, setFilterCat] = useState('All');
+
+  const allCategories = [...new Set(products.map(p => p.category))].sort();
+  const filtered = filterCat === 'All' ? products : products.filter(p => p.category === filterCat);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.price || !form.category) return;
+    onAdd({
+      name: form.name,
+      price: parseFloat(form.price),
+      category: form.category,
+      image: form.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop',
+      description: form.description || '',
+      brand: form.brand || 'Custom',
+    });
+    setForm({ name: '', price: '', category: '', image: '', description: '', brand: '' });
+    setShowForm(false);
+  };
+
+  const startEdit = (id: string, field: 'price' | 'image', current: string) => {
+    setEditingId(id);
+    setEditField(field);
+    setEditValue(current);
+  };
+
+  const saveEdit = () => {
+    if (!editingId || !editField) return;
+    if (editField === 'price') {
+      const num = parseFloat(editValue);
+      if (isNaN(num) || num < 0) return;
+      onUpdate(editingId, { price: num });
+    } else {
+      onUpdate(editingId, { image: editValue });
+    }
+    setEditingId(null);
+    setEditField(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditField(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-lg font-bold text-slate-900">Product Management ({products.length})</h2>
+        <button onClick={() => setShowForm(!showForm)} className="btn-primary !text-sm">
+          <Plus className="w-4 h-4" /> Add Product
+        </button>
+      </div>
+
+      {/* Category filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        <button onClick={() => setFilterCat('All')}
+          className={`px-2.5 py-1 rounded-full text-xs font-semibold ${filterCat === 'All' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}>
+          All
+        </button>
+        {allCategories.map(cat => (
+          <button key={cat} onClick={() => setFilterCat(cat)}
+            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${filterCat === cat ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}>
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Add form */}
+      {showForm && (
+        <form onSubmit={handleSubmit} className="card p-5 space-y-3 border-2 border-blue-200">
+          <h3 className="text-sm font-bold text-slate-900">Add New Product</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              placeholder="Product Name *" required />
+            <input type="number" step="0.01" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+              placeholder="Price ($) *" required />
+            <input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+              placeholder="Category *" required />
+            <input value={form.brand} onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
+              placeholder="Brand" />
+            <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
+              placeholder="Image URL" className="sm:col-span-2" />
+            <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Description" className="sm:col-span-2" />
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">Cancel</button>
+            <button type="submit" disabled={!form.name || !form.price || !form.category} className="btn-primary flex-1">Add Product</button>
+          </div>
+        </form>
+      )}
+
+      {/* Products table */}
+      <div className="card overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-slate-50 text-xs text-slate-500 uppercase">
+              <th className="text-left p-3 w-14">Image</th>
+              <th className="text-left p-3">Name</th>
+              <th className="text-left p-3">Category</th>
+              <th className="text-left p-3">Brand</th>
+              <th className="text-right p-3">Price</th>
+              <th className="p-3 w-24">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(p => (
+              <tr key={p.id} className="border-t border-slate-100 hover:bg-slate-50">
+                {/* Image */}
+                <td className="p-2">
+                  {editingId === p.id && editField === 'image' ? (
+                    <div className="flex gap-1">
+                      <input value={editValue} onChange={e => setEditValue(e.target.value)}
+                        className="!text-[10px] !p-1 w-28" onKeyDown={e => e.key === 'Enter' && saveEdit()} />
+                      <button onClick={saveEdit} className="text-green-600"><Check className="w-3 h-3" /></button>
+                      <button onClick={cancelEdit} className="text-slate-400"><X className="w-3 h-3" /></button>
+                    </div>
+                  ) : (
+                    <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover cursor-pointer hover:ring-2 hover:ring-blue-300"
+                      onClick={() => startEdit(p.id, 'image', p.image)} title="Click to edit image URL" />
+                  )}
+                </td>
+                {/* Name + Description */}
+                <td className="p-3">
+                  <p className="font-semibold text-slate-900">{p.name}</p>
+                  <p className="text-[10px] text-slate-400 truncate max-w-[200px]">{p.description}</p>
+                </td>
+                {/* Category */}
+                <td className="p-3">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{p.category}</span>
+                </td>
+                {/* Brand */}
+                <td className="p-3 text-xs text-slate-500">{p.brand}</td>
+                {/* Price */}
+                <td className="p-3 text-right">
+                  {editingId === p.id && editField === 'price' ? (
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-xs text-slate-400">$</span>
+                      <input type="number" step="0.01" value={editValue} onChange={e => setEditValue(e.target.value)}
+                        className="!text-sm !p-1 w-20 text-right" onKeyDown={e => e.key === 'Enter' && saveEdit()} />
+                      <button onClick={saveEdit} className="text-green-600"><Check className="w-3.5 h-3.5" /></button>
+                      <button onClick={cancelEdit} className="text-slate-400"><X className="w-3.5 h-3.5" /></button>
+                    </div>
+                  ) : (
+                    <span className="font-bold text-slate-900 cursor-pointer hover:text-blue-600"
+                      onClick={() => startEdit(p.id, 'price', p.price.toString())}
+                      title="Click to edit price">
+                      ${p.price.toFixed(2)}
+                    </span>
+                  )}
+                </td>
+                {/* Actions */}
+                <td className="p-3 text-center">
+                  <button onClick={() => { if (window.confirm(`Delete "${p.name}"?`)) onDelete(p.id); }}
+                    className="text-slate-300 hover:text-red-500 transition-colors" title="Delete product">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filtered.length === 0 && (
+          <p className="text-center text-sm text-slate-400 py-8">No products found</p>
         )}
       </div>
     </div>

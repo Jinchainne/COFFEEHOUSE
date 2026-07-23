@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useShop } from '../../hooks/useShop';
-import { ShoppingBag, Plus, Minus, Search, ShoppingCart, X } from 'lucide-react';
+import { useSocial } from '../../hooks/useSocial';
+import { useAccount } from 'wagmi';
+import { ShoppingBag, Plus, Minus, Search, ShoppingCart, X, Heart, Star } from 'lucide-react';
 
 const CATEGORY_LIST = [
   { name: 'All', icon: '🍽️' },
@@ -26,6 +28,60 @@ const CATEGORY_LIST = [
   { name: 'Viet Drinks', icon: '☕' },
   { name: 'Viet Desserts', icon: '🍮' },
 ];
+
+function ProductCard({ product, cartItem, onAdd, onRemove }: any) {
+  const { address } = useAccount();
+  const { toggleWishlist, isWishlisted, getProductRating, getProductComments } = useSocial();
+  const liked = isWishlisted(product.id);
+  const rating = getProductRating(product.id);
+  const commentCount = getProductComments(product.id).length;
+
+  return (
+    <div className="group bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-lg hover:border-slate-200 transition-all duration-300">
+      <div className="aspect-square overflow-hidden bg-slate-50 relative">
+        <img src={product.image} alt={product.name} loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <button onClick={(e) => { e.stopPropagation(); if (address) toggleWishlist(product.id, address); }}
+          className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-red-500 text-white' : 'bg-white/80 text-slate-400 hover:text-red-500'}`}>
+          <Heart className="w-3.5 h-3.5" fill={liked ? 'currentColor' : 'none'} />
+        </button>
+      </div>
+      <div className="p-3">
+        <h3 className="text-sm font-bold text-slate-900 leading-tight mb-1">{product.name}</h3>
+        <p className="text-[11px] text-slate-400 leading-snug mb-1.5 line-clamp-2">{product.description}</p>
+        {rating > 0 && (
+          <div className="flex items-center gap-1 mb-2">
+            {[1,2,3,4,5].map(i => (
+              <Star key={i} className={`w-3 h-3 ${i <= Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`} />
+            ))}
+            <span className="text-[10px] text-slate-400 ml-1">({commentCount})</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <span className="text-base font-extrabold text-red-600">${product.price.toFixed(2)}</span>
+          {cartItem ? (
+            <div className="flex items-center gap-1">
+              <button onClick={() => onRemove(product.id)}
+                className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-red-50">
+                <Minus className="w-3 h-3" />
+              </button>
+              <span className="text-sm font-bold w-6 text-center">{cartItem.quantity}</span>
+              <button onClick={() => onAdd(product)}
+                className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center hover:bg-amber-700">
+                <Plus className="w-3 h-3 text-white" />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => onAdd(product)}
+              className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center hover:bg-amber-700 transition-colors">
+              <Plus className="w-4 h-4 text-white" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ShopMenu() {
   const navigate = useNavigate();
@@ -107,7 +163,7 @@ export default function ShopMenu() {
 
       {/* Main: Sidebar + Grid */}
       <div className="max-w-7xl mx-auto flex">
-        {/* Left Sidebar - Categories */}
+        {/* Left Sidebar */}
         <div className="w-48 flex-shrink-0 border-r border-slate-100 hidden lg:block">
           <div className="sticky top-[calc(2.5rem+3.5rem+3.5rem)] p-3">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Categories</p>
@@ -128,8 +184,6 @@ export default function ShopMenu() {
                 );
               })}
             </div>
-
-            {/* Cart Summary in Sidebar */}
             {cartCount > 0 && (
               <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
                 <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Your Cart ({cartCount})</p>
@@ -144,83 +198,38 @@ export default function ShopMenu() {
                   <span className="text-xs font-medium">Total</span>
                   <span className="text-sm font-extrabold text-amber-700">${cartTotal.toFixed(2)}</span>
                 </div>
-                <button onClick={() => navigate('/shop/delivery')} className="w-full bg-slate-900 text-white text-xs font-bold py-2 rounded-lg mt-2 hover:bg-slate-800">
-                  Checkout
-                </button>
+                <button onClick={() => navigate('/shop/delivery')} className="w-full bg-slate-900 text-white text-xs font-bold py-2 rounded-lg mt-2 hover:bg-slate-800">Checkout</button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right: Product Grid */}
+        {/* Right: Grid */}
         <div className="flex-1 min-w-0 p-4 sm:p-6">
-          {/* Mobile search */}
-          <div className="md:hidden relative mb-4">
+          <div className="lg:hidden relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search..." className="pl-10 w-full h-10 rounded-lg text-sm" />
           </div>
-
-          {/* Mobile category pills */}
           <div className="lg:hidden flex gap-2 mb-4 overflow-x-auto scroll-hide pb-1">
             {CATEGORY_LIST.filter(c => c.name === 'All' || getCount(c.name) > 0).map(cat => (
               <button key={cat.name} onClick={() => setActiveCategory(cat.name)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
-                  activeCategory === cat.name ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-                }`}>
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${activeCategory === cat.name ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}>
                 {cat.icon} {cat.name}
               </button>
             ))}
           </div>
-
-          {/* Breadcrumb */}
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-slate-400">
-              Home &gt; <span className="text-slate-700 font-medium">{activeCategory}</span>
-            </p>
+            <p className="text-xs text-slate-400">Home &gt; <span className="text-slate-700 font-medium">{activeCategory}</span></p>
             <p className="text-xs text-slate-500"><span className="font-bold text-slate-900">{filtered.length}</span> products</p>
           </div>
-
-          {/* Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filtered.map(product => {
-              const cartItem = cart.find(c => c.product.id === product.id);
-              return (
-                <div key={product.id} className="group bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-lg hover:border-slate-200 transition-all duration-300">
-                  <div className="aspect-square overflow-hidden bg-slate-50">
-                    <img src={product.image} alt={product.name} loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-bold text-slate-900 leading-tight mb-1">{product.name}</h3>
-                    <p className="text-[11px] text-slate-400 leading-snug mb-2.5 line-clamp-2">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-base font-extrabold text-red-600">${product.price.toFixed(2)}</span>
-                      {cartItem ? (
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => cartItem.quantity <= 1 ? removeFromCart(product.id) : null}
-                            className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-red-50">
-                            <Minus className="w-3 h-3" />
-                          </button>
-                          <span className="text-sm font-bold w-6 text-center">{cartItem.quantity}</span>
-                          <button onClick={() => addToCart(product)}
-                            className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center hover:bg-amber-700">
-                            <Plus className="w-3 h-3 text-white" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => addToCart(product)}
-                          className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center hover:bg-amber-700 transition-colors">
-                          <Plus className="w-4 h-4 text-white" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {filtered.map(product => (
+              <ProductCard key={product.id} product={product}
+                cartItem={cart.find(c => c.product.id === product.id)}
+                onAdd={addToCart} onRemove={removeFromCart} />
+            ))}
           </div>
-
           {filtered.length === 0 && (
             <div className="text-center py-20">
               <ShoppingBag className="w-16 h-16 text-slate-200 mx-auto mb-4" />
@@ -230,7 +239,7 @@ export default function ShopMenu() {
         </div>
       </div>
 
-      {/* Mobile Cart Bar */}
+      {/* Mobile Cart */}
       {cartCount > 0 && !showCart && (
         <div className="fixed bottom-0 left-0 right-0 lg:hidden z-30 p-3 bg-white border-t border-slate-200 shadow-lg">
           <button onClick={() => navigate('/shop/delivery')}
