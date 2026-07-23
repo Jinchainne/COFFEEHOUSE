@@ -111,8 +111,8 @@ export default function ShopMenu() {
                       <img src={product.image} alt={product.name} loading="lazy" />
                     </div>
                     <div className="p-3.5">
-                      <h3 className="text-sm font-bold text-slate-900 truncate mb-0.5">{product.name}</h3>
-                      <p className="text-[11px] text-slate-400 mb-3 line-clamp-1">{product.description}</p>
+                      <h3 className="text-sm font-bold text-slate-900 leading-tight">{product.name}</h3>
+                      <p className="text-[11px] text-slate-400 mb-3 line-clamp-2 leading-snug">{product.description}</p>
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="text-base font-extrabold gradient-text">${product.price.toFixed(2)}</span>
