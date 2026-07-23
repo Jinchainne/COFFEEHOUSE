@@ -5,10 +5,11 @@ import { useShop } from '../../hooks/useShop';
 import { formatCurrency } from '../../utils/format';
 import {
   LayoutDashboard, ShoppingCart, Receipt, Calculator, LogOut, Plus, Trash2,
-  TrendingUp, TrendingDown, DollarSign, Package, ChefHat, Truck, Clock, Check, X, ExternalLink, MapPin
+  TrendingUp, TrendingDown, DollarSign, Package, ChefHat, Truck, Clock, Check, X, ExternalLink, MapPin,
+  Download, Upload, HardDrive
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'orders' | 'finance' | 'tax' | 'products';
+type Tab = 'dashboard' | 'orders' | 'finance' | 'tax' | 'products' | 'backup';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ export default function AdminDashboard() {
     { id: 'finance' as Tab, label: 'Finance', icon: Receipt },
     { id: 'tax' as Tab, label: 'Tax', icon: Calculator },
     { id: 'products' as Tab, label: 'Products', icon: Package },
+    { id: 'backup' as Tab, label: 'Backup', icon: HardDrive },
   ];
 
   return (
@@ -286,6 +288,9 @@ export default function AdminDashboard() {
         {tab === 'products' && (
           <ProductsTab products={products} onAdd={addProduct} onUpdate={updateProduct} onDelete={deleteProduct} />
         )}
+
+        {/* ═══════ BACKUP ═══════ */}
+        {tab === 'backup' && <BackupTab products={products} orders={orders} />}
       </div>
     </div>
   );
@@ -677,6 +682,171 @@ function ProductsTab({ products, onAdd, onUpdate, onDelete }: {
         {filtered.length === 0 && (
           <p className="text-center text-sm text-slate-400 py-8">No products found</p>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════ BACKUP TAB ═══════
+function BackupTab({ products, orders }: { products: any[]; orders: any[] }) {
+  const [importing, setImporting] = useState(false);
+  const [lastBackup, setLastBackup] = useState<string | null>(() => localStorage.getItem('arcbank_last_backup'));
+
+  const exportBackup = () => {
+    const backup = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      shopName: 'Coffee House',
+      products: JSON.parse(localStorage.getItem('arcbank_products') || '[]'),
+      orders: JSON.parse(localStorage.getItem('arcbank_orders') || '[]'),
+      finances: JSON.parse(localStorage.getItem('arcbank_finances') || '[]'),
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `coffee-house-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    const now = new Date().toLocaleString();
+    localStorage.setItem('arcbank_last_backup', now);
+    setLastBackup(now);
+  };
+
+  const exportCSV = () => {
+    const prods = JSON.parse(localStorage.getItem('arcbank_products') || '[]');
+    const header = 'id,name,price,category,brand,description,image\n';
+    const rows = prods.map((p: any) =>
+      `"${p.id}","${p.name}",${p.price},"${p.category}","${p.brand}","${(p.description || '').replace(/"/g, '""')}","${p.image?.startsWith('data:') ? '(base64-image)' : p.image}"`
+    ).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `coffee-house-products-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        if (!data.products || !Array.isArray(data.products)) {
+          alert('Invalid backup file: missing products data');
+          setImporting(false);
+          return;
+        }
+        const confirmMsg = `Restore backup from ${data.exportedAt || 'unknown date'}?\n\n` +
+          `• ${data.products.length} products\n` +
+          `• ${data.orders?.length || 0} orders\n` +
+          `• ${data.finances?.length || 0} finance entries\n\n` +
+          `This will REPLACE all current data. Continue?`;
+        if (!window.confirm(confirmMsg)) { setImporting(false); return; }
+
+        localStorage.setItem('arcbank_products', JSON.stringify(data.products));
+        if (data.orders) localStorage.setItem('arcbank_orders', JSON.stringify(data.orders));
+        if (data.finances) localStorage.setItem('arcbank_finances', JSON.stringify(data.finances));
+        alert('Backup restored successfully! The page will reload.');
+        window.location.reload();
+      } catch (err) {
+        alert('Failed to parse backup file: ' + (err as Error).message);
+      }
+      setImporting(false);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold text-slate-900">Data Backup & Restore</h2>
+
+      {/* Export section */}
+      <div className="card p-6">
+        <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <Download className="w-4 h-4 text-blue-600" /> Export Backup
+        </h3>
+        <p className="text-xs text-slate-500 mb-4">
+          Download all shop data to your computer. Store this file safely — you can use it to restore everything if browser data is cleared.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button onClick={exportBackup}
+            className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition-colors text-left">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Download className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-blue-900">Full Backup (JSON)</p>
+              <p className="text-[10px] text-blue-600">Products, orders, finances — complete data</p>
+            </div>
+          </button>
+          <button onClick={exportCSV}
+            className="flex items-center gap-3 p-4 bg-emerald-50 hover:bg-emerald-100 rounded-xl border border-emerald-200 transition-colors text-left">
+            <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-emerald-900">Products (CSV)</p>
+              <p className="text-[10px] text-emerald-600">Spreadsheet format — edit in Excel/Google Sheets</p>
+            </div>
+          </button>
+        </div>
+        {lastBackup && (
+          <p className="text-[10px] text-slate-400 mt-3">Last backup: {lastBackup}</p>
+        )}
+      </div>
+
+      {/* Import section */}
+      <div className="card p-6">
+        <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <Upload className="w-4 h-4 text-amber-600" /> Restore from Backup
+        </h3>
+        <p className="text-xs text-slate-500 mb-4">
+          Upload a previously exported JSON backup file to restore all data. <span className="text-red-500 font-semibold">Warning: This will replace all current data.</span>
+        </p>
+        <label className="flex items-center gap-3 p-4 bg-amber-50 hover:bg-amber-100 rounded-xl border-2 border-dashed border-amber-300 hover:border-amber-400 cursor-pointer transition-colors">
+          <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Upload className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-amber-900">{importing ? 'Restoring...' : 'Choose Backup File'}</p>
+            <p className="text-[10px] text-amber-600">Select a .json backup file to restore</p>
+          </div>
+          <input type="file" accept=".json" className="hidden" onChange={importBackup} disabled={importing} />
+        </label>
+      </div>
+
+      {/* Current data summary */}
+      <div className="card p-6">
+        <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <HardDrive className="w-4 h-4 text-slate-600" /> Current Data Summary
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-3 bg-slate-50 rounded-xl">
+            <p className="text-2xl font-extrabold text-slate-900">{products.length}</p>
+            <p className="text-xs text-slate-500">Products</p>
+          </div>
+          <div className="text-center p-3 bg-slate-50 rounded-xl">
+            <p className="text-2xl font-extrabold text-slate-900">{orders.length}</p>
+            <p className="text-xs text-slate-500">Orders</p>
+          </div>
+          <div className="text-center p-3 bg-slate-50 rounded-xl">
+            <p className="text-2xl font-extrabold text-slate-900">
+              {JSON.parse(localStorage.getItem('arcbank_finances') || '[]').length}
+            </p>
+            <p className="text-xs text-slate-500">Finance Entries</p>
+          </div>
+        </div>
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          <p className="text-[11px] text-blue-700">
+            <strong>Storage used:</strong> ~{(new Blob([JSON.stringify(localStorage)]).size / 1024).toFixed(0)} KB of ~5 MB limit
+          </p>
+        </div>
       </div>
     </div>
   );
