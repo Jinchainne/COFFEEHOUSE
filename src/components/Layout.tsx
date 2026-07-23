@@ -1,7 +1,5 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
-import AIChat from './AIChat';
-import NetworkDebug from './NetworkDebug';
 
 export default function Layout() {
   return (
@@ -10,25 +8,14 @@ export default function Layout() {
       <main className="max-w-7xl mx-auto">
         <Outlet />
       </main>
-      <AIChat />
-      <NetworkDebug />
-      
+
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
             <div>
-              <h4 className="text-white font-bold text-sm mb-4">Global Payments</h4>
-              <p className="text-xs leading-relaxed">Digital banking on stablecoin rails. Built on Arc Testnet with USDC.</p>
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm mb-4">Services</h4>
-              <ul className="space-y-2 text-xs">
-                <li><a href="/send" className="hover:text-white">Send Money</a></li>
-                <li><a href="/receive" className="hover:text-white">Receive</a></li>
-                <li><a href="/split" className="hover:text-white">Split Bill</a></li>
-                <li><a href="/remit" className="hover:text-white">Remittance</a></li>
-              </ul>
+              <h4 className="text-white font-bold text-sm mb-4">ArcPay Shop</h4>
+              <p className="text-xs leading-relaxed">Order food & drinks, pay with USDC on Arc Testnet. Fast, cheap, on-chain.</p>
             </div>
             <div>
               <h4 className="text-white font-bold text-sm mb-4">Resources</h4>
@@ -39,19 +26,20 @@ export default function Layout() {
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold text-sm mb-4">Security</h4>
+              <h4 className="text-white font-bold text-sm mb-4">Network</h4>
               <ul className="space-y-2 text-xs">
-                <li>PCI DSS Compliant</li>
-                <li>SSL/TLS Encrypted</li>
-                <li>Arc L1 Finality &lt;1s</li>
+                <li>Arc Testnet · Chain 5042002</li>
+                <li>Sub-second finality</li>
+                <li>~$0.01 gas fee</li>
+                <li>USDC gas token</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-800 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-xs">&copy; 2026 Global Payments. Programmable Money Hackathon.</p>
+            <p className="text-xs">&copy; 2026 ArcPay Shop. Pay with stablecoins.</p>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />
-              <span className="text-xs">Arc Testnet · Chain 5042002</span>
+              <span className="text-xs">Live on Arc Testnet</span>
             </div>
           </div>
         </div>

@@ -1,27 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { useAccount } from 'wagmi';
 import { useShop } from '../../hooks/useShop';
-import WalletConnect from '../../components/WalletConnect';
-import { AlertCircle, ExternalLink, Clock, Check, X, ShoppingBag } from 'lucide-react';
+import { ExternalLink, Clock, Check, X, ShoppingBag, Coffee } from 'lucide-react';
 
 export default function ShopOrders() {
-  const { isConnected } = useAccount();
   const navigate = useNavigate();
   const { orders } = useShop();
-
-  if (!isConnected) {
-    return (
-      <div className="bg-white min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="card p-8 text-center max-w-md mx-auto">
-            <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Connect Wallet</h3>
-            <WalletConnect />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const statusIcon = (status: string) => {
     switch (status) {
@@ -49,8 +32,8 @@ export default function ShopOrders() {
             <h1 className="text-2xl font-extrabold text-slate-900">Order History</h1>
             <p className="text-sm text-slate-400">{orders.length} orders</p>
           </div>
-          <button onClick={() => navigate('/shop')} className="btn-primary !px-4 !text-sm">
-            <ShoppingBag className="w-4 h-4" /> New Order
+          <button onClick={() => navigate('/shop')} className="btn-primary !px-4 !text-sm flex items-center gap-1.5">
+            <Coffee className="w-4 h-4" /> New Order
           </button>
         </div>
 
@@ -74,7 +57,6 @@ export default function ShopOrders() {
                   </span>
                 </div>
 
-                {/* Items */}
                 <div className="space-y-1.5 mb-3">
                   {order.items.map(item => (
                     <div key={item.product.id} className="flex items-center gap-2">

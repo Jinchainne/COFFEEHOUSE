@@ -1,39 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAccount } from 'wagmi';
 import { useShop } from '../../hooks/useShop';
-import WalletConnect from '../../components/WalletConnect';
-import { ShoppingBag, Plus, Minus, Trash2, Search, AlertCircle, ShoppingCart } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, Trash2, Search, ShoppingCart, Store } from 'lucide-react';
 
 export default function ShopMenu() {
-  const { isConnected } = useAccount();
   const navigate = useNavigate();
-  const { products, categories, cart, cartTotal, cartCount, addToCart, removeFromCart, updateQuantity } = useShop();
+  const { products, categories, brands, cart, cartTotal, cartCount, addToCart, removeFromCart, updateQuantity } = useShop();
   const [activeCategory, setActiveCategory] = useState('All');
+  const [activeBrand, setActiveBrand] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCart, setShowCart] = useState(false);
 
   const filtered = products.filter(p => {
     const matchCategory = activeCategory === 'All' || p.category === activeCategory;
-    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCategory && matchSearch;
+    const matchBrand = activeBrand === 'All' || p.brand === activeBrand;
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCategory && matchBrand && matchSearch;
   });
-
-  if (!isConnected) {
-    return (
-      <div className="bg-white min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-1">ArcPay Shop</h1>
-          <p className="text-sm text-slate-400 mb-8">Pay with USDC on Arc Testnet</p>
-          <div className="card p-8 text-center max-w-md mx-auto">
-            <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Connect Wallet</h3>
-            <WalletConnect />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white min-h-screen">
@@ -42,7 +25,7 @@ export default function ShopMenu() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-extrabold text-slate-900">ArcPay Shop</h1>
-            <p className="text-sm text-slate-400">Pay with USDC on Arc Testnet</p>
+            <p className="text-sm text-slate-400">{products.length} items · Pay with USDC on Arc Testnet</p>
           </div>
           <button onClick={() => setShowCart(!showCart)} className="relative btn-primary !px-4">
             <ShoppingCart className="w-5 h-5" />
@@ -63,12 +46,39 @@ export default function ShopMenu() {
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search menu..."
+                placeholder="Search menu or brand..."
                 className="pl-10 w-full"
               />
             </div>
 
-            {/* Categories */}
+            {/* Brand Filter */}
+            <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+              <button
+                onClick={() => setActiveBrand('All')}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeBrand === 'All'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <Store className="w-3 h-3" /> All Brands
+              </button>
+              {brands.map(brand => (
+                <button
+                  key={brand}
+                  onClick={() => setActiveBrand(brand)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                    activeBrand === brand
+                      ? 'bg-slate-900 text-white'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {brand}
+                </button>
+              ))}
+            </div>
+
+            {/* Category Filter */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
               {categories.map(cat => (
                 <button
@@ -85,19 +95,25 @@ export default function ShopMenu() {
               ))}
             </div>
 
+            {/* Results count */}
+            <p className="text-xs text-slate-400 mb-4">{filtered.length} items</p>
+
             {/* Product Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {filtered.map(product => {
                 const cartItem = cart.find(c => c.product.id === product.id);
                 return (
                   <div key={product.id} className="card overflow-hidden group hover:shadow-lg transition-shadow">
-                    <div className="aspect-square overflow-hidden bg-slate-100">
+                    <div className="aspect-square overflow-hidden bg-slate-100 relative">
                       <img
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         loading="lazy"
                       />
+                      <span className="absolute top-2 left-2 bg-white/90 backdrop-blur text-[10px] font-bold text-slate-700 px-2 py-0.5 rounded-full">
+                        {product.brand}
+                      </span>
                     </div>
                     <div className="p-3">
                       <h3 className="text-sm font-bold text-slate-900 truncate">{product.name}</h3>
@@ -193,14 +209,14 @@ export default function ShopMenu() {
 
         {/* Mobile Cart Button */}
         {cartCount > 0 && (
-          <div className="fixed bottom-20 left-4 right-4 lg:hidden z-40">
+          <div className="fixed bottom-6 left-4 right-4 lg:hidden z-40">
             <button
               onClick={() => navigate('/shop/checkout')}
               className="w-full btn-primary flex items-center justify-between !rounded-2xl shadow-xl"
             >
               <span className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5" />
-                View Cart
+                View Cart ({cartCount})
               </span>
               <span className="font-extrabold">${cartTotal.toFixed(2)} USDC</span>
             </button>

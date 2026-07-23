@@ -1,0 +1,290 @@
+[
+  {
+    "name": "Original Blend Coffee",
+    "category": "Hot Beverages",
+    "description": "Dunkin's signature original blend hot coffee, smooth and rich",
+    "price": 1.89,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Iced Coffee",
+    "category": "Iced Beverages",
+    "description": "Freshly brewed coffee served over ice, customizable with flavors",
+    "price": 2.49,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Cappuccino",
+    "category": "Hot Beverages",
+    "description": "Espresso with steamed milk and a thick layer of foam",
+    "price": 3.19,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Latte",
+    "category": "Hot Beverages",
+    "description": "Espresso with steamed milk, smooth and creamy",
+    "price": 3.19,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Iced Latte",
+    "category": "Iced Beverages",
+    "description": "Espresso with cold milk served over ice",
+    "price": 3.59,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Macchiato",
+    "category": "Hot Beverages",
+    "description": "Espresso marked with a dollop of steamed milk and foam",
+    "price": 3.39,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Iced Macchiato",
+    "category": "Iced Beverages",
+    "description": "Espresso layered over cold milk and ice",
+    "price": 3.79,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Dunkaccino",
+    "category": "Hot Beverages",
+    "description": "A unique blend of Dunkin's coffee and hot chocolate flavors",
+    "price": 2.09,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Hot Chocolate",
+    "category": "Hot Beverages",
+    "description": "Rich and creamy hot chocolate topped with whipped cream",
+    "price": 2.15,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Vanilla Chai",
+    "category": "Hot Beverages",
+    "description": "Spiced chai tea blended with vanilla and steamed milk",
+    "price": 2.15,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Iced Tea",
+    "category": "Iced Beverages",
+    "description": "Refreshing iced tea, available sweetened or unsweetened",
+    "price": 1.99,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Coolatta",
+    "category": "Frozen Beverages",
+    "description": "Frozen blended beverage available in multiple flavors",
+    "price": 3.99,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Frozen Coffee",
+    "category": "Frozen Beverages",
+    "description": "Coffee blended with ice for a smooth frozen treat",
+    "price": 3.99,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Glazed Donut",
+    "category": "Bakery",
+    "description": "Classic yeast donut with a sweet glaze coating",
+    "price": 0.99,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Munchkins Donut Holes",
+    "category": "Bakery",
+    "description": "Bite-sized donut holes in assorted flavors",
+    "price": 6.29,
+    "size": "25 Pc",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Bagel with Cream Cheese",
+    "category": "Bakery",
+    "description": "Freshly baked bagel served with cream cheese spread",
+    "price": 2.09,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Bacon, Egg & Cheese on Croissant",
+    "category": "Breakfast Sandwiches",
+    "description": "Crispy bacon, egg, and melted cheese on a flaky croissant",
+    "price": 3.59,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Sausage, Egg & Cheese on Croissant",
+    "category": "Breakfast Sandwiches",
+    "description": "Savory sausage patty with egg and cheese on a buttery croissant",
+    "price": 3.59,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Wake-Up Wrap",
+    "category": "Breakfast Sandwiches",
+    "description": "Scrambled eggs and cheese with bacon, ham, or sausage in a tortilla wrap",
+    "price": 3.09,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Hash Browns",
+    "category": "Sides",
+    "description": "Crispy golden hash brown bites",
+    "price": 1.29,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Turkey, Cheddar & Bacon Sandwich",
+    "category": "Sandwiches",
+    "description": "Sliced turkey with cheddar cheese and crispy bacon",
+    "price": 3.69,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Ham & Cheese Sandwich",
+    "category": "Sandwiches",
+    "description": "Sliced ham with melted cheese on fresh bread",
+    "price": 3.69,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Box O' Joe",
+    "category": "Hot Beverages",
+    "description": "A box of 10 cups worth of Dunkin's signature coffee, perfect for groups",
+    "price": 15.99,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Caramel Swirl Latte",
+    "category": "Hot Beverages",
+    "description": "Latte blended with sweet caramel swirl flavor",
+    "price": 3.19,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "French Vanilla Swirl Iced Coffee",
+    "category": "Iced Beverages",
+    "description": "Iced coffee with French vanilla swirl flavoring",
+    "price": 2.49,
+    "size": "Medium",
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "Muffin",
+    "category": "Bakery",
+    "description": "Freshly baked muffin in assorted flavors",
+    "price": 1.69,
+    "source": "Dunkin Donuts"
+  },
+  {
+    "name": "1-pc. Chickenjoy w/ Drink",
+    "category": "Chickenjoy",
+    "description": "Philippines' best-tasting crispylicious, juicylicious Chickenjoy that is crispy on the outside, tender and juicy on the inside. Served with rice and a drink.",
+    "price": 4.99,
+    "source": "Jollibee"
+  },
+  {
+    "name": "2-pc. Chickenjoy Solo",
+    "category": "Chickenjoy",
+    "description": "Two pieces of Jollibee's signature crispy fried chicken served with rice",
+    "price": 5.99,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Chickenjoy New Spicy Solo",
+    "category": "Chickenjoy",
+    "description": "Crispy fried chicken with a spicy kick, served with rice",
+    "price": 4.49,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Yumburger",
+    "category": "Burgers",
+    "description": "Jollibee's signature burger with a langhap-sarap beefy patty and special dressing",
+    "price": 1.99,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Cheesy Yumburger",
+    "category": "Burgers",
+    "description": "Yumburger topped with melted cheese for extra savory flavor",
+    "price": 2.49,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Jolly Spaghetti",
+    "category": "Jolly Spaghetti & Palabok",
+    "description": "Sweet-style spaghetti with sliced hotdogs, ground meat, and cheese",
+    "price": 3.49,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Burger Steak Solo",
+    "category": "Burger Steak & Chicken Fillet",
+    "description": "Beef burger patties smothered in mushroom gravy, served with rice",
+    "price": 3.49,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Beef Tapa Solo",
+    "category": "Breakfast",
+    "description": "A delicious combination of garlic rice, fried egg, and tender beef tapa",
+    "price": 4.49,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Longganisa Solo",
+    "category": "Breakfast",
+    "description": "A delicious combination of garlic rice, fried egg and 2 pieces of mildly seasoned longganisa",
+    "price": 4.29,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Corned Beef Solo",
+    "category": "Breakfast",
+    "description": "A delicious combination of garlic rice, fried egg, and juicy corned beef",
+    "price": 4.29,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Breakfast Burger Steak Solo",
+    "category": "Breakfast",
+    "description": "A delicious combination of garlic rice, fried egg, and gravy-poured breakfast steak",
+    "price": 3.99,
+    "source": "Jollibee"
+  },
+  {
+    "name": "2-pc. Pancakes Solo",
+    "category": "Breakfast",
+    "description": "2-piece moist pancakes served with butter and maple syrup",
+    "price": 2.99,
+    "source": "Jollibee"
+  },
+  {
+    "name": "Bacon, Egg, & Cheese Pancake Sandwich",
+    "category": "Breakfast",
+    "description": "Crispy bacon, cheese, and fried egg, sandwiched between two lightly glazed pancake buns",
+    "price": 3.49,
+    "source": "Jollibee"
+  }
+]
