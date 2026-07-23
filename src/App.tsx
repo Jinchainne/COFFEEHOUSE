@@ -7,6 +7,7 @@ import Layout from './components/Layout';
 import ShopMenu from './pages/Shop/ShopMenu';
 import ShopCheckout from './pages/Shop/ShopCheckout';
 import ShopOrders from './pages/Shop/ShopOrders';
+import DeliveryPage from './pages/Shop/DeliveryPage';
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ export default function App() {
               <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="/shop" replace />} />
                 <Route path="shop" element={<ShopMenu />} />
+                <Route path="shop/delivery" element={<DeliveryPage />} />
                 <Route path="shop/checkout" element={<ShopCheckout />} />
                 <Route path="shop/orders" element={<ShopOrders />} />
               </Route>

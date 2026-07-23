@@ -195,7 +195,7 @@ export default function ShopMenu() {
                     </div>
 
                     <button
-                      onClick={() => navigate('/shop/checkout')}
+                      onClick={() => navigate('/shop/delivery')}
                       className="btn-primary w-full"
                     >
                       Checkout
@@ -211,7 +211,7 @@ export default function ShopMenu() {
         {cartCount > 0 && (
           <div className="fixed bottom-6 left-4 right-4 lg:hidden z-40">
             <button
-              onClick={() => navigate('/shop/checkout')}
+              onClick={() => navigate('/shop/delivery')}
               className="w-full btn-primary flex items-center justify-between !rounded-2xl shadow-xl"
             >
               <span className="flex items-center gap-2">

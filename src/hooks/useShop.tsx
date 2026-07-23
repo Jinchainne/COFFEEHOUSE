@@ -15,14 +15,23 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface DeliveryAddress {
+  lat: number;
+  lng: number;
+  address: string;
+  note: string;
+}
+
 export interface Order {
   id: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'confirmed' | 'failed';
+  status: 'pending' | 'confirmed' | 'preparing' | 'shipping' | 'delivered' | 'failed';
   txHash?: string;
   timestamp: number;
   merchantAddress: string;
+  delivery?: DeliveryAddress;
+  shippingFee: number;
 }
 
 export const MERCHANT_ADDRESS = '0x363700d10ca9c4809ad7034f5b21650a9a5e34bd';
@@ -113,9 +122,57 @@ const PRODUCTS: Product[] = [
   { id: 'js5', name: 'Lemon Mint Cooler', price: 4.00, category: 'Juice', brand: 'Fresh Bar', image: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&h=400&fit=crop', description: 'Fresh lemon juice with mint and a hint of honey' },
   { id: 'js6', name: 'Bubble Milk Tea', price: 5.00, category: 'Tea', brand: 'Fresh Bar', image: 'https://images.unsplash.com/photo-1558857563-b371033873b8?w=400&h=400&fit=crop', description: 'Classic milk tea with chewy tapioca pearls' },
   { id: 'js7', name: 'Thai Iced Tea', price: 4.50, category: 'Tea', brand: 'Fresh Bar', image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=400&fit=crop', description: 'Strong brewed Thai tea with sweetened condensed milk over ice' },
+
+  // ═══════════════════ VIETNAMESE FOOD ═══════════════════
+  // Phở & Bún
+  { id: 'vn1', name: 'Phở Bò Tái', price: 6.50, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400&h=400&fit=crop', description: 'Phở bò với thịt bò tái, nước dùng hầm xương 24 giờ' },
+  { id: 'vn2', name: 'Phở Bò Chín', price: 6.50, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400&h=400&fit=crop', description: 'Phở bò với thịt bò chín mềm, hành ngò tươi' },
+  { id: 'vn3', name: 'Phở Gà', price: 5.95, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400&h=400&fit=crop', description: 'Phở gà ta nước trong, thịt gà xé phay' },
+  { id: 'vn4', name: 'Bún Bò Huế', price: 7.25, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Bún bò Huế cay nồng, chả cua, giò heo' },
+  { id: 'vn5', name: 'Bún Riêu Cua', price: 6.75, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Bún riêu cua đồng, cà chua, đậu hũ, tôm khô' },
+  { id: 'vn6', name: 'Bún Chả Hà Nội', price: 7.50, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Bún chả Hà Nội — thịt nướng than hoa, nước mắm chua ngọt' },
+  { id: 'vn7', name: 'Bún Đậu Mắm Tôm', price: 7.95, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Bún đậu mắm tôm — đậu rán giòn, thịt luộc, rau sống' },
+  { id: 'vn8', name: 'Bánh Canh Cua', price: 6.95, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Bánh canh cua đặc sánh, tôm, chả cá' },
+
+  // Cơm
+  { id: 'vn9', name: 'Cơm Tấm Sườn Nướng', price: 7.50, category: 'Cơm', brand: 'Cơm Việt', image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop', description: 'Cơm tấm sườn nướng than hoa, chả trứng, nước mắm' },
+  { id: 'vn10', name: 'Cơm Gà Hội An', price: 6.95, category: 'Cơm', brand: 'Cơm Việt', image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop', description: 'Cơm gà Hội An — gà xé phay, rau răm, hành phi' },
+  { id: 'vn11', name: 'Cơm Chiên Dương Châu', price: 6.50, category: 'Cơm', brand: 'Cơm Việt', image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop', description: 'Cơm chiên dương châu — tôm, lạp xưởng, trứng, đậu Hà Lan' },
+  { id: 'vn12', name: 'Cơm Sườn Bì Chả', price: 8.25, category: 'Cơm', brand: 'Cơm Việt', image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=400&fit=crop', description: 'Cơm tấm đặc biệt — sườn nướng, bì, chả trứng' },
+
+  // Bánh Mì
+  { id: 'vn13', name: 'Bánh Mì Thịt', price: 3.50, category: 'Bánh Mì', brand: 'Bánh Mì Việt', image: 'https://images.unsplash.com/photo-1600688640154-9619e002df30?w=400&h=400&fit=crop', description: 'Bánh mì thịt nguội, pate, đồ chua, ớt, ngò' },
+  { id: 'vn14', name: 'Bánh Mì Gà', price: 3.75, category: 'Bánh Mì', brand: 'Bánh Mì Việt', image: 'https://images.unsplash.com/photo-1600688640154-9619e002df30?w=400&h=400&fit=crop', description: 'Bánh mì gà nướng, rau răm, nước tương' },
+  { id: 'vn15', name: 'Bánh Mì Chả Cá', price: 4.00, category: 'Bánh Mì', brand: 'Bánh Mì Việt', image: 'https://images.unsplash.com/photo-1600688640154-9619e002df30?w=400&h=400&fit=crop', description: 'Bánh mì chả cá Nha Trang, rau sống, nước mắm' },
+  { id: 'vn16', name: 'Bánh Mì Heo Quay', price: 4.25, category: 'Bánh Mì', brand: 'Bánh Mì Việt', image: 'https://images.unsplash.com/photo-1600688640154-9619e002df30?w=400&h=400&fit=crop', description: 'Bánh mì heo quay giòn bì, nước sốt thịt' },
+
+  // Bánh & Snack
+  { id: 'vn17', name: 'Bánh Xèo', price: 5.95, category: 'Bánh & Snack', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=400&fit=crop', description: 'Bánh xèo miền Tây — tôm, thịt, giá đỗ, nước mắm chua ngọt' },
+  { id: 'vn18', name: 'Bánh Cuốn', price: 5.50, category: 'Bánh & Snack', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=400&fit=crop', description: 'Bánh cuốn nhân thịt mộc nhĩ, chả lụa, hành phi' },
+  { id: 'vn19', name: 'Gỏi Cuốn', price: 4.50, category: 'Bánh & Snack', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=400&fit=crop', description: 'Gỏi cuốn tôm thịt, bún, rau sống, nước mắm nêm' },
+  { id: 'vn20', name: 'Chả Giò (Nem Rán)', price: 5.25, category: 'Bánh & Snack', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=400&h=400&fit=crop', description: 'Chả giò giòn rụm — thịt, miến, mộc nhĩ, cà rốt' },
+
+  // Canh & Lẩu
+  { id: 'vn21', name: 'Lẩu Thái', price: 15.95, category: 'Lẩu', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Lẩu Thái chua cay — tôm, mực, cá, nấm, rau' },
+  { id: 'vn22', name: 'Lẩu Bò Nhúng Dấm', price: 14.50, category: 'Lẩu', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Lẩu bò nhúng dấm — bò Mỹ, bún, rau sống, nước chấm' },
+  { id: 'vn23', name: 'Bò Kho', price: 7.50, category: 'Phở & Bún', brand: 'Phở Việt', image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop', description: 'Bò kho mềm, cà rốt, sả, ăn với bánh mì hoặc bún' },
+
+  // Đồ Uống Việt
+  { id: 'vn24', name: 'Cà Phê Sữa Đá', price: 3.50, category: 'Đồ Uống Việt', brand: 'Cà Phê Việt', image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=400&fit=crop', description: 'Cà phê phin Robusta với sữa đặc, served over ice' },
+  { id: 'vn25', name: 'Cà Phê Đen Đá', price: 2.75, category: 'Đồ Uống Việt', brand: 'Cà Phê Việt', image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop', description: 'Cà phê phin đen đậm đà, không sữa, served over ice' },
+  { id: 'vn26', name: 'Bạc Xỉu', price: 3.75, category: 'Đồ Uống Việt', brand: 'Cà Phê Việt', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&h=400&fit=crop', description: 'Bạc xỉu — sữa nóng với chút cà phê, kiểu Sài Gòn' },
+  { id: 'vn27', name: 'Trà Đá', price: 1.00, category: 'Đồ Uống Việt', brand: 'Cà Phê Việt', image: 'https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&h=400&fit=crop', description: 'Trà đá Việt Nam — trà xanh ướp lạnh' },
+  { id: 'vn28', name: 'Sinh Tố Bơ', price: 4.50, category: 'Đồ Uống Việt', brand: 'Cà Phê Việt', image: 'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400&h=400&fit=crop', description: 'Sinh tố bơ dẻo mịn với sữa đặc' },
+  { id: 'vn29', name: 'Chè Ba Màu', price: 3.50, category: 'Đồ Uống Việt', brand: 'Cà Phê Việt', image: 'https://images.unsplash.com/photo-1558857563-b371033873b8?w=400&h=400&fit=crop', description: 'Chè ba màu — đậu đỏ, đậu xanh, thạch lá nứa, nước cốt dừa' },
+  { id: 'vn30', name: 'Nước Mía', price: 2.00, category: 'Đồ Uống Việt', brand: 'Cà Phê Việt', image: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&h=400&fit=crop', description: 'Nước mía tươi ép, thêm tắc' },
+
+  // Tráng Miệng Việt
+  { id: 'vn31', name: 'Chè Đậu Đỏ', price: 3.00, category: 'Tráng Miệng', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1558857563-b371033873b8?w=400&h=400&fit=crop', description: 'Chè đậu đỏ nước cốt dừa, thơm bùi' },
+  { id: 'vn32', name: 'Bánh Flan (Caramen)', price: 2.50, category: 'Tráng Miệng', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400&h=400&fit=crop', description: 'Bánh flan caramel mềm mịn, cà phê sữa' },
+  { id: 'vn33', name: 'Kem Chuối', price: 2.75, category: 'Tráng Miệng', brand: 'Quán Việt', image: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&h=400&fit=crop', description: 'Kem chuối dừa — chuối, nước cốt dừa, đậu phộng' },
 ];
 
-export const CATEGORIES = ['All', 'Hot Coffee', 'Cold Coffee', 'Tea', 'Juice', 'Refreshers', 'Burgers', 'Chicken', 'Sandwiches', 'Pizza', 'Pasta', 'Sides', 'Breakfast', 'Bakery', 'Desserts', 'Drinks'];
+export const CATEGORIES = ['All', 'Hot Coffee', 'Cold Coffee', 'Tea', 'Juice', 'Refreshers', 'Burgers', 'Chicken', 'Sandwiches', 'Pizza', 'Pasta', 'Sides', 'Breakfast', 'Bakery', 'Desserts', 'Drinks', 'Phở & Bún', 'Cơm', 'Bánh Mì', 'Bánh & Snack', 'Lẩu', 'Đồ Uống Việt', 'Tráng Miệng'];
 export const BRANDS = [...new Set(PRODUCTS.map(p => p.brand))];
 
 interface ShopCtx {
