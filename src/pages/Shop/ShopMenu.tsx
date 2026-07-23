@@ -19,7 +19,6 @@ export default function ShopMenu() {
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-extrabold text-slate-900">ArcPay Shop</h1>
@@ -36,52 +35,30 @@ export default function ShopMenu() {
         </div>
 
         <div className="flex gap-6">
-          {/* Main Content */}
           <div className="flex-1 min-w-0">
-            {/* Search */}
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Tìm món..."
-                className="pl-10 w-full"
-              />
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search menu..." className="pl-10 w-full" />
             </div>
 
-            {/* Category Filter */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
               {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-                    activeCategory === cat
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
+                <button key={cat} onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                   {cat}
                 </button>
               ))}
             </div>
 
-            {/* Results count */}
-            <p className="text-xs text-slate-400 mb-4">{filtered.length} món</p>
+            <p className="text-xs text-slate-400 mb-4">{filtered.length} items</p>
 
-            {/* Product Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {filtered.map(product => {
                 const cartItem = cart.find(c => c.product.id === product.id);
                 return (
                   <div key={product.id} className="card overflow-hidden group hover:shadow-lg transition-shadow">
                     <div className="aspect-square overflow-hidden bg-slate-100">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        loading="lazy"
-                      />
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
                     </div>
                     <div className="p-3">
                       <h3 className="text-sm font-bold text-slate-900 truncate">{product.name}</h3>
@@ -90,25 +67,16 @@ export default function ShopMenu() {
                         <span className="text-sm font-extrabold text-blue-600">${product.price.toFixed(2)}</span>
                         {cartItem ? (
                           <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => updateQuantity(product.id, cartItem.quantity - 1)}
-                              className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200"
-                            >
+                            <button onClick={() => updateQuantity(product.id, cartItem.quantity - 1)} className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200">
                               <Minus className="w-3 h-3" />
                             </button>
                             <span className="text-xs font-bold w-5 text-center">{cartItem.quantity}</span>
-                            <button
-                              onClick={() => addToCart(product)}
-                              className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center hover:bg-blue-200"
-                            >
+                            <button onClick={() => addToCart(product)} className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center hover:bg-blue-200">
                               <Plus className="w-3 h-3 text-blue-600" />
                             </button>
                           </div>
                         ) : (
-                          <button
-                            onClick={() => addToCart(product)}
-                            className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center hover:bg-blue-700 transition-colors"
-                          >
+                          <button onClick={() => addToCart(product)} className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center hover:bg-blue-700 transition-colors">
                             <Plus className="w-4 h-4 text-white" />
                           </button>
                         )}
@@ -122,21 +90,19 @@ export default function ShopMenu() {
             {filtered.length === 0 && (
               <div className="text-center py-12 text-slate-400">
                 <ShoppingBag className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                <p className="text-sm">Không tìm thấy món</p>
+                <p className="text-sm">No items found</p>
               </div>
             )}
           </div>
 
-          {/* Cart Sidebar */}
           {showCart && (
             <div className="w-80 flex-shrink-0 hidden lg:block">
               <div className="card p-4 sticky top-20">
                 <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4" /> Đơn hàng ({cartCount})
+                  <ShoppingCart className="w-4 h-4" /> Your Order ({cartCount})
                 </h3>
-
                 {cart.length === 0 ? (
-                  <p className="text-sm text-slate-400 text-center py-8">Giỏ hàng trống</p>
+                  <p className="text-sm text-slate-400 text-center py-8">Cart is empty</p>
                 ) : (
                   <>
                     <div className="space-y-3 max-h-80 overflow-y-auto mb-4">
@@ -154,17 +120,13 @@ export default function ShopMenu() {
                         </div>
                       ))}
                     </div>
-
                     <div className="border-t border-slate-100 pt-3 mb-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-slate-600">Tổng</span>
+                        <span className="text-sm font-medium text-slate-600">Total</span>
                         <span className="text-lg font-extrabold text-slate-900">${cartTotal.toFixed(2)} USDC</span>
                       </div>
                     </div>
-
-                    <button onClick={() => navigate('/shop/delivery')} className="btn-primary w-full">
-                      Đặt hàng
-                    </button>
+                    <button onClick={() => navigate('/shop/delivery')} className="btn-primary w-full">Checkout</button>
                   </>
                 )}
               </div>
@@ -172,17 +134,10 @@ export default function ShopMenu() {
           )}
         </div>
 
-        {/* Mobile Cart Button */}
         {cartCount > 0 && (
           <div className="fixed bottom-6 left-4 right-4 lg:hidden z-40">
-            <button
-              onClick={() => navigate('/shop/delivery')}
-              className="w-full btn-primary flex items-center justify-between !rounded-2xl shadow-xl"
-            >
-              <span className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                Xem giỏ hàng ({cartCount})
-              </span>
+            <button onClick={() => navigate('/shop/delivery')} className="w-full btn-primary flex items-center justify-between !rounded-2xl shadow-xl">
+              <span className="flex items-center gap-2"><ShoppingCart className="w-5 h-5" /> View Cart ({cartCount})</span>
               <span className="font-extrabold">${cartTotal.toFixed(2)} USDC</span>
             </button>
           </div>

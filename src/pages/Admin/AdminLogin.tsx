@@ -26,7 +26,7 @@ export default function AdminLogin() {
       if (ok) {
         navigate('/admin/dashboard');
       } else {
-        setError('Sai mật khẩu admin');
+        setError('Wrong admin password');
       }
     }, 500);
   };
@@ -40,19 +40,19 @@ export default function AdminLogin() {
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-extrabold text-slate-900">Admin Panel</h1>
-            <p className="text-sm text-slate-400 mt-1">Đăng nhập để quản lý hệ thống</p>
+            <p className="text-sm text-slate-400 mt-1">Login to manage the system</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Mật khẩu Admin</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Admin Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError(''); }}
-                  placeholder="Nhập mật khẩu admin"
+                  placeholder="Enter admin password"
                   className="pl-10 pr-10 w-full"
                   autoFocus
                 />
@@ -68,19 +68,19 @@ export default function AdminLogin() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Đang xác thực...
+                  Authenticating...
                 </span>
-              ) : 'Đăng nhập'}
+              ) : 'Login'}
             </button>
           </form>
 
           <p className="text-center text-xs text-slate-400 mt-6">
-            Demo: mật khẩu = <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-mono">admin123</code>
+            Demo: password = <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-mono">admin123</code>
           </p>
         </div>
 
         <button onClick={() => navigate('/shop')} className="w-full text-center text-sm text-slate-400 hover:text-slate-600 mt-4">
-          ← Quay lại Shop
+          ← Back to Shop
         </button>
       </div>
     </div>

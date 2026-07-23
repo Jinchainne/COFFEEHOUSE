@@ -6,7 +6,7 @@ export interface FinanceEntry {
   category: string;
   description: string;
   amount: number;
-  date: string; // YYYY-MM-DD
+  date: string;
   note: string;
 }
 
@@ -22,12 +22,12 @@ interface AdminCtx {
   profit: number;
 }
 
-const ADMIN_PASSWORD = 'admin123'; // Demo password
+const ADMIN_PASSWORD = 'admin123';
 
 const AdminContext = createContext<AdminCtx | null>(null);
 
-const EXPENSE_CATEGORIES = ['Nguyên liệu', 'Lương nhân viên', 'Thuê mặt bằng', 'Điện/Nước/Internet', 'Vận chuyển', 'Marketing', 'Thiết bị', 'Thuế', 'Khác'];
-const INCOME_CATEGORIES = ['Bán hàng', 'Ship fee', 'Tip', 'Khác'];
+const EXPENSE_CATEGORIES = ['Ingredients', 'Staff Salary', 'Rent', 'Utilities', 'Shipping', 'Marketing', 'Equipment', 'Tax', 'Other'];
+const INCOME_CATEGORIES = ['Sales', 'Shipping Fee', 'Tips', 'Other'];
 
 export { EXPENSE_CATEGORIES, INCOME_CATEGORIES };
 
@@ -99,17 +99,17 @@ function getDefaultFinances(): FinanceEntry[] {
     return dt.toISOString().split('T')[0];
   };
   return [
-    { id: 'f1', type: 'income', category: 'Bán hàng', description: 'Doanh thu ngày 23/07', amount: 245.50, date: d(0), note: '15 đơn hàng' },
-    { id: 'f2', type: 'income', category: 'Bán hàng', description: 'Doanh thu ngày 22/07', amount: 189.25, date: d(1), note: '12 đơn hàng' },
-    { id: 'f3', type: 'income', category: 'Bán hàng', description: 'Doanh thu ngày 21/07', amount: 312.00, date: d(2), note: '20 đơn hàng' },
-    { id: 'f4', type: 'income', category: 'Ship fee', description: 'Phí ship tuần này', amount: 87.50, date: d(0), note: 'Tổng phí vận chuyển' },
-    { id: 'f5', type: 'expense', category: 'Nguyên liệu', description: 'Mua cà phê hạt', amount: 120.00, date: d(1), note: '5kg robusta + 3kg arabica' },
-    { id: 'f6', type: 'expense', category: 'Nguyên liệu', description: 'Mua thực phẩm tươi', amount: 85.00, date: d(1), note: 'Rau, thịt, hải sản' },
-    { id: 'f7', type: 'expense', category: 'Lương nhân viên', description: 'Lương tuần NV #1', amount: 150.00, date: d(0), note: 'Part-time' },
-    { id: 'f8', type: 'expense', category: 'Điện/Nước/Internet', description: 'Hóa đơn điện tháng 7', amount: 95.00, date: d(5), note: '' },
-    { id: 'f9', type: 'expense', category: 'Thuê mặt bằng', description: 'Tiền thuê tháng 7', amount: 500.00, date: d(7), note: 'Trả trước' },
-    { id: 'f10', type: 'expense', category: 'Marketing', description: 'Quảng cáo Facebook', amount: 50.00, date: d(3), note: 'Boost post' },
-    { id: 'f11', type: 'expense', category: 'Vận chuyển', description: 'Phí ship bên thứ 3', amount: 35.00, date: d(2), note: 'Đơn ngoài' },
-    { id: 'f12', type: 'income', category: 'Tip', description: 'Tip khách', amount: 15.00, date: d(0), note: 'Tiền tip' },
+    { id: 'f1', type: 'income', category: 'Sales', description: 'Daily revenue Jul 23', amount: 245.50, date: d(0), note: '15 orders' },
+    { id: 'f2', type: 'income', category: 'Sales', description: 'Daily revenue Jul 22', amount: 189.25, date: d(1), note: '12 orders' },
+    { id: 'f3', type: 'income', category: 'Sales', description: 'Daily revenue Jul 21', amount: 312.00, date: d(2), note: '20 orders' },
+    { id: 'f4', type: 'income', category: 'Shipping Fee', description: 'Weekly shipping income', amount: 87.50, date: d(0), note: 'Total delivery fees' },
+    { id: 'f5', type: 'expense', category: 'Ingredients', description: 'Coffee beans purchase', amount: 120.00, date: d(1), note: '5kg robusta + 3kg arabica' },
+    { id: 'f6', type: 'expense', category: 'Ingredients', description: 'Fresh produce', amount: 85.00, date: d(1), note: 'Vegetables, meat, seafood' },
+    { id: 'f7', type: 'expense', category: 'Staff Salary', description: 'Weekly salary Staff #1', amount: 150.00, date: d(0), note: 'Part-time' },
+    { id: 'f8', type: 'expense', category: 'Utilities', description: 'Electricity bill July', amount: 95.00, date: d(5), note: '' },
+    { id: 'f9', type: 'expense', category: 'Rent', description: 'Rent payment July', amount: 500.00, date: d(7), note: 'Prepaid' },
+    { id: 'f10', type: 'expense', category: 'Marketing', description: 'Facebook ads', amount: 50.00, date: d(3), note: 'Boost post' },
+    { id: 'f11', type: 'expense', category: 'Shipping', description: 'Third-party delivery', amount: 35.00, date: d(2), note: 'External orders' },
+    { id: 'f12', type: 'income', category: 'Tips', description: 'Customer tips', amount: 15.00, date: d(0), note: 'Tips' },
   ];
 }
