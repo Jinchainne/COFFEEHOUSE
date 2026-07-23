@@ -1,36 +1,57 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi';
 import { useState, useRef, useEffect } from 'react';
-import { Wallet, ChevronDown, Copy, ExternalLink, LogOut, Check } from 'lucide-react';
+import { Wallet, ChevronDown, Copy, ExternalLink, LogOut, Check, AlertTriangle, X } from 'lucide-react';
+import { arcTestnet } from '../config/chains';
 
 function shortenAddress(addr: string) {
   if (!addr) return '';
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-const WALLET_INFO: Record<string, { icon: string; desc: string }> = {
-  MetaMask: { icon: '🦊', desc: 'Browser extension wallet' },
-  'Coinbase Wallet': { icon: '🔵', desc: 'Coinbase mobile or extension' },
-  WalletConnect: { icon: '🔗', desc: 'Scan QR with any mobile wallet' },
-  Injected: { icon: '💉', desc: 'Browser injected wallet' },
-  'Brave Wallet': { icon: '🦁', desc: 'Built into Brave browser' },
-  'Rabby Wallet': { icon: '🐰', desc: 'Rabby browser extension' },
-  'Trust Wallet': { icon: '🛡️', desc: 'Trust Wallet mobile' },
+const WALLET_ICONS: Record<string, string> = {
+  MetaMask: '🦊',
+  'Coinbase Wallet': '🔵',
+  WalletConnect: '🔗',
+  Injected: '💉',
+  'Brave Wallet': '🦁',
+  Rabby: '🐰',
+  'Trust Wallet': '🛡️',
+  'Binance Wallet': '🟡',
+  OKX: '⬛',
+  'Base Account': '🅱️',
+};
+
+const WALLET_DESC: Record<string, string> = {
+  MetaMask: 'Browser extension wallet',
+  'Coinbase Wallet': 'Coinbase mobile or extension',
+  WalletConnect: 'Scan QR with any mobile wallet',
+  Injected: 'Browser injected wallet',
+  'Brave Wallet': 'Built into Brave browser',
+  Rabby: 'Rabby browser extension',
+  'Trust Wallet': 'Trust Wallet mobile app',
 };
 
 export default function WalletConnect() {
   const { address, isConnected, chain } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const { switchChain } = useSwitchChain();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showConnectors, setShowConnectors] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Auto-switch to Arc Testnet after connecting
+  useEffect(() => {
+    if (isConnected && chain && chain.id !== arcTestnet.id) {
+      switchChain({ chainId: arcTestnet.id });
+    }
+  }, [isConnected, chain]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
-        setShowConnectors(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -45,46 +66,72 @@ export default function WalletConnect() {
     }
   };
 
-  // NOT CONNECTED
-  if (!isConnected) {
-    if (showConnectors) {
-      return (
-        <div className="relative" ref={dropdownRef}>
-          <div className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Select Wallet</p>
-            <div className="space-y-2">
-              {connectors.map(connector => {
-                const info = WALLET_INFO[connector.name] || { icon: '👛', desc: 'Connect wallet' };
-                return (
-                  <button
-                    key={connector.uid}
-                    onClick={() => { connect({ connector }); setShowConnectors(false); }}
-                    disabled={isPending}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">
-                      {info.icon}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-slate-900">{connector.name}</p>
-                      <p className="text-[10px] text-slate-400">{info.desc}</p>
-                    </div>
-                    {isPending && <span className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />}
-                  </button>
-                );
-              })}
-            </div>
-            <button onClick={() => setShowConnectors(false)} className="w-full mt-3 py-2 text-xs text-slate-400 hover:text-slate-600">
-              Cancel
+  const isWrongChain = isConnected && chain && chain.id !== arcTestnet.id;
+
+  // WALLET SELECTOR MODAL
+  if (showModal) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 text-center relative">
+            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded-lg">
+              <X className="w-5 h-5 text-slate-400" />
             </button>
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-200">
+              <Wallet className="w-7 h-7 text-white" />
+            </div>
+            <h2 className="text-xl font-extrabold text-slate-900">Log in or sign up</h2>
+            <p className="text-sm text-slate-400 mt-1">Connect wallet to pay with USDC on Arc Testnet</p>
+          </div>
+
+          {/* Wallet List */}
+          <div className="px-6 pb-4 space-y-2">
+            {connectors.map(connector => {
+              const icon = WALLET_ICONS[connector.name] || '👛';
+              const desc = WALLET_DESC[connector.name] || 'Connect wallet';
+              return (
+                <button
+                  key={connector.uid}
+                  onClick={() => {
+                    connect({ connector });
+                    setShowModal(false);
+                  }}
+                  disabled={isPending}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left group"
+                >
+                  <div className="w-11 h-11 rounded-xl bg-slate-50 group-hover:bg-blue-100 flex items-center justify-center text-2xl transition-colors">
+                    {icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-900">{connector.name}</p>
+                    <p className="text-[11px] text-slate-400">{desc}</p>
+                  </div>
+                  {isPending && <span className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 pb-6">
+            <div className="flex items-center gap-2 justify-center">
+              <div className="w-4 h-4 rounded bg-emerald-100 flex items-center justify-center">
+                <Check className="w-3 h-3 text-emerald-600" />
+              </div>
+              <p className="text-[11px] text-slate-400">By connecting, you agree to our Terms of Service</p>
+            </div>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
+  // NOT CONNECTED
+  if (!isConnected) {
     return (
       <button
-        onClick={() => setShowConnectors(true)}
+        onClick={() => setShowModal(true)}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-sm font-semibold shadow-md shadow-blue-200 transition-all hover:shadow-lg hover:-translate-y-0.5"
       >
         <Wallet className="w-4 h-4" />
@@ -93,7 +140,22 @@ export default function WalletConnect() {
     );
   }
 
-  // CONNECTED
+  // WRONG CHAIN WARNING
+  if (isWrongChain) {
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => switchChain({ chainId: arcTestnet.id })}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-all"
+        >
+          <AlertTriangle className="w-4 h-4 text-amber-500" />
+          <span className="text-xs font-semibold text-amber-700">Switch to Arc</span>
+        </button>
+      </div>
+    );
+  }
+
+  // CONNECTED — correct chain
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -125,7 +187,7 @@ export default function WalletConnect() {
             </div>
             {chain && (
               <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <div className={`w-2 h-2 rounded-full ${chain.id === arcTestnet.id ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                 <span className="text-xs text-slate-600">{chain.name}</span>
                 <span className="ml-auto text-[10px] text-slate-400 font-mono">ID {chain.id}</span>
               </div>
