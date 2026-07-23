@@ -23,8 +23,8 @@ export default function ShopMenu() {
     return (
       <div className="bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-1">The Space Coffee</h1>
-          <p className="text-sm text-slate-400 mb-8">Order & pay with USDC on Arc Testnet</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 mb-1">ArcPay Shop</h1>
+          <p className="text-sm text-slate-400 mb-8">Pay with USDC on Arc Testnet</p>
           <div className="card p-8 text-center max-w-md mx-auto">
             <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-slate-900 mb-2">Connect Wallet</h3>
@@ -41,8 +41,8 @@ export default function ShopMenu() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900">The Space Coffee</h1>
-            <p className="text-sm text-slate-400">Order & pay with USDC on Arc Testnet</p>
+            <h1 className="text-2xl font-extrabold text-slate-900">ArcPay Shop</h1>
+            <p className="text-sm text-slate-400">Pay with USDC on Arc Testnet</p>
           </div>
           <button onClick={() => setShowCart(!showCart)} className="relative btn-primary !px-4">
             <ShoppingCart className="w-5 h-5" />

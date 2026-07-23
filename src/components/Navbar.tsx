@@ -10,7 +10,7 @@ const navItems = [
     { label: 'Receive', path: '/receive' },
     { label: 'Split Bill', path: '/split' },
                         { label: 'Remittance', path: '/remit' },
-                        { label: 'Shop', path: '/shop' },
+                        { label: 'ArcPay Shop', path: '/shop' },
                         { label: 'Contacts', path: '/contacts' },
   ]},
   { label: 'About Global Payments', path: '#about' },
