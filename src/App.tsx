@@ -16,7 +16,7 @@ import DeliveryPage from './pages/Shop/DeliveryPage';
 import POSCheckout from './pages/Shop/POSCheckout';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
-import AgentDashboard from './pages/Admin/AgentDashboard';
+
 
 const queryClient = new QueryClient();
 
@@ -42,7 +42,7 @@ export default function App() {
                   </Route>
                   <Route path="/admin" element={<AdminLogin />} />
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/agents" element={<AgentDashboard />} />
+
                 </Routes>
                 </SocialProvider>
               </AgentProvider>

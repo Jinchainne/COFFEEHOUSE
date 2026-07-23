@@ -6,10 +6,12 @@ import { formatCurrency } from '../../utils/format';
 import {
   LayoutDashboard, ShoppingCart, Receipt, Calculator, LogOut, Plus, Trash2,
   TrendingUp, TrendingDown, DollarSign, Package, ChefHat, Truck, Clock, Check, X, ExternalLink, MapPin,
-  Download, Upload, HardDrive
+  Download, Upload, HardDrive, Brain
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'orders' | 'finance' | 'tax' | 'products' | 'backup';
+import { AdminAgentPanel } from './AgentDashboard';
+
+type Tab = 'dashboard' | 'orders' | 'finance' | 'tax' | 'products' | 'ai-agent' | 'backup';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ export default function AdminDashboard() {
     { id: 'finance' as Tab, label: 'Finance', icon: Receipt },
     { id: 'tax' as Tab, label: 'Tax', icon: Calculator },
     { id: 'products' as Tab, label: 'Products', icon: Package },
+    { id: 'ai-agent' as Tab, label: 'AI Agent', icon: Brain },
     { id: 'backup' as Tab, label: 'Backup', icon: HardDrive },
   ];
 
@@ -291,6 +294,7 @@ export default function AdminDashboard() {
         )}
 
         {/* ═══════ BACKUP ═══════ */}
+        {tab === 'ai-agent' && <AdminAgentPanel />}
         {tab === 'backup' && <BackupTab products={products} orders={orders} />}
       </div>
     </div>
