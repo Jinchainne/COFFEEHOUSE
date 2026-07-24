@@ -222,7 +222,7 @@
 ## 📁 Project Structure
 
 ```
-arcbank/
+COFFEE HOUSE/
 ├── public/
 │   ├── logo.png                          # COFFEE HOUSE crest logo
 │   ├── favicon.png                       # Browser favicon
