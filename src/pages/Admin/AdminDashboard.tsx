@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../../hooks/useAdmin';
-import { useShop } from '../../hooks/useShop';
+import { useShop, getShippingConfig, saveShippingConfig, type ShippingConfig } from '../../hooks/useShop';
 import { formatCurrency } from '../../utils/format';
 import {
   LayoutDashboard, ShoppingCart, Receipt, Calculator, LogOut, Plus, Trash2,
   TrendingUp, TrendingDown, DollarSign, Package, ChefHat, Truck, Clock, Check, X, ExternalLink, MapPin,
-  Download, Upload, HardDrive, Brain
+  Download, Upload, HardDrive, Brain, Settings
 } from 'lucide-react';
 
 import { AdminAgentPanel } from './AgentDashboard';
 
-type Tab = 'dashboard' | 'orders' | 'finance' | 'tax' | 'products' | 'ai-agent' | 'backup';
+type Tab = 'dashboard' | 'orders' | 'finance' | 'tax' | 'products' | 'ai-agent' | 'shipping' | 'backup';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -51,6 +51,7 @@ export default function AdminDashboard() {
     { id: 'tax' as Tab, label: 'Tax', icon: Calculator },
     { id: 'products' as Tab, label: 'Products', icon: Package },
     { id: 'ai-agent' as Tab, label: 'AI Agent', icon: Brain },
+    { id: 'shipping' as Tab, label: 'Shipping', icon: Settings },
     { id: 'backup' as Tab, label: 'Backup', icon: HardDrive },
   ];
 
@@ -293,8 +294,13 @@ export default function AdminDashboard() {
           <ProductsTab products={products} onAdd={addProduct} onUpdate={updateProduct} onDelete={deleteProduct} />
         )}
 
-        {/* ═══════ BACKUP ═══════ */}
+        {/* ═══════ AI AGENT ═══════ */}
         {tab === 'ai-agent' && <AdminAgentPanel />}
+
+        {/* ═══════ SHIPPING SETTINGS ═══════ */}
+        {tab === 'shipping' && <ShippingSettingsTab />}
+
+        {/* ═══════ BACKUP ═══════ */}
         {tab === 'backup' && <BackupTab products={products} orders={orders} />}
       </div>
     </div>
@@ -741,6 +747,168 @@ function PublishButton({ products }: { products: any[] }) {
           {result}
         </div>
       )}
+    </div>
+  );
+}
+
+// ═══════ SHIPPING SETTINGS TAB ═══════
+function ShippingSettingsTab() {
+  const [config, setConfig] = useState<ShippingConfig>(getShippingConfig);
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    saveShippingConfig(config);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleReset = () => {
+    const defaults: ShippingConfig = { freeRadiusKm: 10, pricePerKm: 0.1, maxFee: 10 };
+    setConfig(defaults);
+    saveShippingConfig(defaults);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-extrabold text-slate-900">Shipping Fee Settings</h2>
+          <p className="text-sm text-slate-500">Configure delivery pricing based on distance from nearest store</p>
+        </div>
+        {saved && (
+          <span className="text-sm font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg">✓ Saved!</span>
+        )}
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-4">
+        {/* Free Radius */}
+        <div className="card p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <MapPin className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Free Shipping Radius</p>
+              <p className="text-sm font-bold text-slate-900">Distance for FREE delivery</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="number" min={0} max={100} step={1}
+              value={config.freeRadiusKm}
+              onChange={e => setConfig({ ...config, freeRadiusKm: parseFloat(e.target.value) || 0 })}
+              className="flex-1 text-center text-lg font-bold h-12 rounded-xl" />
+            <span className="text-sm font-semibold text-slate-500">km</span>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-2">Orders within this radius get free shipping</p>
+        </div>
+
+        {/* Price per km */}
+        <div className="card p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Truck className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Price Per Extra km</p>
+              <p className="text-sm font-bold text-slate-900">Beyond free radius</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-500">$</span>
+            <input type="number" min={0} max={5} step={0.01}
+              value={config.pricePerKm}
+              onChange={e => setConfig({ ...config, pricePerKm: parseFloat(e.target.value) || 0 })}
+              className="flex-1 text-center text-lg font-bold h-12 rounded-xl" />
+            <span className="text-sm font-semibold text-slate-500">/km</span>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-2">Fee per km beyond the free radius</p>
+        </div>
+
+        {/* Max Fee */}
+        <div className="card p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-4 h-4 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Maximum Fee Cap</p>
+              <p className="text-sm font-bold text-slate-900">Shipping fee limit</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-500">$</span>
+            <input type="number" min={0} max={50} step={0.5}
+              value={config.maxFee}
+              onChange={e => setConfig({ ...config, maxFee: parseFloat(e.target.value) || 0 })}
+              className="flex-1 text-center text-lg font-bold h-12 rounded-xl" />
+            <span className="text-sm font-semibold text-slate-500">max</span>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-2">Maximum shipping fee regardless of distance</p>
+        </div>
+      </div>
+
+      {/* Fee Preview Table */}
+      <div className="card p-5">
+        <h3 className="text-sm font-bold text-slate-900 mb-3">Fee Preview</h3>
+        <p className="text-xs text-slate-400 mb-4">How shipping fees look for different distances</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="text-left py-2 text-xs text-slate-400 font-medium">Distance</th>
+                <th className="text-right py-2 text-xs text-slate-400 font-medium">Shipping Fee</th>
+                <th className="text-right py-2 text-xs text-slate-400 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[0, 5, 10, 15, 20, 30, 50, 80, 100, 150].map(km => {
+                const fee = km <= config.freeRadiusKm ? 0 : Math.min(config.maxFee, Math.round((km - config.freeRadiusKm) * config.pricePerKm * 100) / 100);
+                return (
+                  <tr key={km} className="border-b border-slate-50 last:border-0">
+                    <td className="py-2 font-medium">{km} km</td>
+                    <td className="py-2 text-right font-bold">{fee === 0 ? 'FREE' : `$${fee.toFixed(2)}`}</td>
+                    <td className="py-2 text-right">
+                      {fee === 0 ? (
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Free Zone</span>
+                      ) : fee >= config.maxFee ? (
+                        <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold">Max Cap</span>
+                      ) : (
+                        <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold">Standard</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <button onClick={handleSave}
+          className="flex-1 bg-slate-900 text-white font-bold text-sm py-3 rounded-xl hover:bg-amber-700 transition-colors">
+          Save Settings
+        </button>
+        <button onClick={handleReset}
+          className="px-6 bg-white text-slate-700 font-semibold text-sm py-3 rounded-xl border border-slate-200 hover:bg-slate-50">
+          Reset to Default
+        </button>
+      </div>
+
+      {/* Current Formula */}
+      <div className="card p-4 bg-slate-50 border-dashed">
+        <p className="text-xs font-bold text-slate-500 mb-2">Current Formula</p>
+        <p className="text-sm text-slate-700 font-mono">
+          if distance ≤ {config.freeRadiusKm}km → <span className="text-emerald-600 font-bold">FREE</span>
+        </p>
+        <p className="text-sm text-slate-700 font-mono">
+          if distance {'>'} {config.freeRadiusKm}km → min(${config.maxFee}, (distance - {config.freeRadiusKm}) × ${config.pricePerKm})
+        </p>
+        <p className="text-[10px] text-slate-400 mt-2">Distance calculated from customer to nearest COFFEE HOUSE store (63 locations nationwide)</p>
+      </div>
     </div>
   );
 }

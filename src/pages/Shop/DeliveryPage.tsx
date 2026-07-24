@@ -1,24 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useShop, type DeliveryAddress } from '../../hooks/useShop';
-import { ArrowLeft, MapPin, Navigation, Truck, Search, X, Loader2 } from 'lucide-react';
+import { useShop, type DeliveryAddress, calcShippingFeeFromConfig, getShippingConfig } from '../../hooks/useShop';
+import { ArrowLeft, MapPin, Navigation, Truck, Search, X, Loader2, Store, ChevronDown, ChevronUp } from 'lucide-react';
+import { STORE_LOCATIONS, type StoreLocation } from '../../data/storeLocations';
 
 const MAP_SCRIPT = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
 const MAP_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
 
-const DEFAULT_LAT = 10.8231;
-const DEFAULT_LNG = 106.6297;
-
-function calcShippingFee(lat: number, lng: number): number {
-  const shopLat = 10.7769;
-  const shopLng = 106.7009;
-  const R = 6371;
-  const dLat = ((lat - shopLat) * Math.PI) / 180;
-  const dLng = ((lng - shopLng) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((shopLat * Math.PI) / 180) * Math.cos((lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-  const km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.min(8, Math.round((1.5 + km * 0.5) * 100) / 100);
-}
+const DEFAULT_LAT = 10.7769;
+const DEFAULT_LNG = 106.7009;
 
 interface GeoResult {
   name: string;
@@ -42,10 +32,6 @@ const POPULAR_LOCATIONS: GeoResult[] = [
   { name: 'Quy Nhon', lat: 13.7560, lng: 109.2180, display_name: 'Quy Nhon, Binh Dinh, Vietnam' },
   { name: 'Buon Ma Thuot', lat: 12.6660, lng: 108.0380, display_name: 'Buon Ma Thuot, Dak Lak, Vietnam' },
   { name: 'District 1, HCMC', lat: 10.7769, lng: 106.7009, display_name: 'District 1, Ho Chi Minh City, Vietnam' },
-  { name: 'District 7, HCMC', lat: 10.7290, lng: 106.7180, display_name: 'District 7, Ho Chi Minh City, Vietnam' },
-  { name: 'Tan Binh, HCMC', lat: 10.8015, lng: 106.6530, display_name: 'Tan Binh District, Ho Chi Minh City, Vietnam' },
-  { name: 'Binh Thanh, HCMC', lat: 10.8070, lng: 106.7100, display_name: 'Binh Thanh District, Ho Chi Minh City, Vietnam' },
-  { name: 'Thu Duc, HCMC', lat: 10.8700, lng: 106.7700, display_name: 'Thu Duc City, Ho Chi Minh City, Vietnam' },
 ];
 
 export default function DeliveryPage() {
@@ -64,8 +50,51 @@ export default function DeliveryPage() {
   const [searching, setSearching] = useState(false);
   const searchTimeoutRef = useRef<any>(null);
 
-  const shippingFee = calcShippingFee(position.lat, position.lng);
+  // Store selector state
+  const [showStores, setShowStores] = useState(false);
+  const [storeSearch, setStoreSearch] = useState('');
+  const [selectedStore, setSelectedStore] = useState<StoreLocation | null>(null);
+  const [nearestStoreName, setNearestStoreName] = useState('');
+
+  const shippingConfig = getShippingConfig();
+  const shippingFee = calcShippingFeeFromConfig(position.lat, position.lng, shippingConfig);
   const grandTotal = cartTotal + shippingFee;
+
+  // Find nearest store name for display
+  const findNearestStore = useCallback((lat: number, lng: number) => {
+    let minKm = Infinity;
+    let nearest = '';
+    for (const store of STORE_LOCATIONS) {
+      const R = 6371;
+      const dLat = ((lat - store.lat) * Math.PI) / 180;
+      const dLng = ((lng - store.lng) * Math.PI) / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos((store.lat * Math.PI) / 180) * Math.cos((lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+      const km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      if (km < minKm) { minKm = km; nearest = store.province; }
+    }
+    setNearestStoreName(`${nearest} (${minKm.toFixed(1)}km)`);
+    return minKm;
+  }, []);
+
+  const filteredStores = STORE_LOCATIONS.filter(s =>
+    !storeSearch || s.province.toLowerCase().includes(storeSearch.toLowerCase()) || s.address.toLowerCase().includes(storeSearch.toLowerCase())
+  );
+
+  // Select a store branch
+  const selectStore = useCallback((store: StoreLocation) => {
+    const fullAddr = `${store.address}, ${store.province}`;
+    setPosition({ lat: store.lat, lng: store.lng });
+    setAddress(fullAddr);
+    setSearchQuery(store.province);
+    setSelectedStore(store);
+    setShowStores(false);
+    setStoreSearch('');
+    if (mapInstanceRef.current && markerRef.current) {
+      mapInstanceRef.current.setView([store.lat, store.lng], 15);
+      markerRef.current.setLatLng([store.lat, store.lng]);
+    }
+    findNearestStore(store.lat, store.lng);
+  }, [findNearestStore]);
 
   // Reverse geocode: coordinates → address
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
@@ -81,7 +110,8 @@ export default function DeliveryPage() {
     } catch {
       setAddress(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
     }
-  }, []);
+    findNearestStore(lat, lng);
+  }, [findNearestStore]);
 
   // Search addresses - instant local match + Nominatim fallback
   const searchAddress = useCallback(async (query: string) => {
@@ -98,8 +128,20 @@ export default function DeliveryPage() {
       loc.name.toLowerCase().includes(q) || loc.display_name.toLowerCase().includes(q)
     );
 
-    if (localMatches.length > 0) {
-      setSuggestions(localMatches);
+    // Also match store locations
+    const storeMatches: GeoResult[] = STORE_LOCATIONS.filter(s =>
+      s.province.toLowerCase().includes(q) || s.address.toLowerCase().includes(q)
+    ).map(s => ({
+      name: s.province,
+      lat: s.lat,
+      lng: s.lng,
+      display_name: `${s.address}, ${s.province}`,
+    }));
+
+    const merged = [...storeMatches, ...localMatches.filter(l => !storeMatches.find(s => s.name === l.name))];
+
+    if (merged.length > 0) {
+      setSuggestions(merged.slice(0, 8));
       setShowSuggestions(true);
     }
 
@@ -117,8 +159,6 @@ export default function DeliveryPage() {
           lng: parseFloat(item.lon),
           display_name: item.display_name,
         }));
-        // Merge with local results, dedupe by name
-        const merged = [...localMatches];
         results.forEach(r => {
           if (!merged.find(m => m.name === r.name)) merged.push(r);
         });
@@ -152,7 +192,9 @@ export default function DeliveryPage() {
       mapInstanceRef.current.setView([s.lat, s.lng], 15);
       markerRef.current.setLatLng([s.lat, s.lng]);
     }
-    // Reverse geocode to get full address
+    // Check if matches a store
+    const store = STORE_LOCATIONS.find(st => st.province === s.name || st.lat === s.lat);
+    if (store) setSelectedStore(store);
     setTimeout(() => reverseGeocode(s.lat, s.lng), 500);
   }, [reverseGeocode]);
 
@@ -189,12 +231,14 @@ export default function DeliveryPage() {
     marker.on('dragend', () => {
       const pos = marker.getLatLng();
       setPosition({ lat: pos.lat, lng: pos.lng });
+      setSelectedStore(null);
       reverseGeocode(pos.lat, pos.lng);
     });
 
     map.on('click', (e: any) => {
       marker.setLatLng(e.latlng);
       setPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
+      setSelectedStore(null);
       reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
 
@@ -244,7 +288,46 @@ export default function DeliveryPage() {
         </button>
 
         <h1 className="text-2xl font-extrabold text-slate-900 mb-1">Delivery Address</h1>
-        <p className="text-sm text-slate-400 mb-4">Search or tap on map to set your location</p>
+        <p className="text-sm text-slate-400 mb-4">Search, select a store branch, or tap on map</p>
+
+        {/* Store Branch Selector */}
+        <div className="mb-4">
+          <button onClick={() => setShowStores(!showStores)}
+            className="w-full flex items-center justify-between p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm hover:bg-amber-100 transition-colors">
+            <div className="flex items-center gap-2">
+              <Store className="w-4 h-4 text-amber-600" />
+              <span className="font-semibold text-amber-800">
+                {selectedStore ? `Store: ${selectedStore.province}` : 'Select nearest store branch (63 locations)'}
+              </span>
+            </div>
+            {showStores ? <ChevronUp className="w-4 h-4 text-amber-600" /> : <ChevronDown className="w-4 h-4 text-amber-600" />}
+          </button>
+
+          {showStores && (
+            <div className="mt-2 bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
+              <div className="p-2 border-b border-slate-100">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input value={storeSearch} onChange={e => setStoreSearch(e.target.value)}
+                    placeholder="Search province..."
+                    className="w-full h-8 pl-9 pr-3 text-xs rounded-lg border-slate-200" autoFocus />
+                </div>
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {filteredStores.map(store => (
+                  <button key={store.province} onClick={() => selectStore(store)}
+                    className="w-full text-left px-4 py-2.5 hover:bg-amber-50 transition-colors flex items-start gap-2 border-b border-slate-50 last:border-0">
+                    <MapPin className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-800">{store.province}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{store.address}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Address Search with Autocomplete */}
         <div className="relative mb-4">
@@ -256,7 +339,7 @@ export default function DeliveryPage() {
               setShowSuggestions(true);
             }}
             onFocus={() => { if (searchQuery.length >= 2) setShowSuggestions(true); }}
-            placeholder="Type city or address (e.g. Nha Trang, Da Nang...)"
+            placeholder="Or type city/address manually..."
             className="pl-10 pr-10 w-full"
             autoComplete="off"
           />
@@ -302,6 +385,7 @@ export default function DeliveryPage() {
                 mapInstanceRef.current.setView([lat, lng], 16);
                 markerRef.current.setLatLng([lat, lng]);
                 setPosition({ lat, lng });
+                setSelectedStore(null);
                 reverseGeocode(lat, lng);
               });
             }
@@ -337,9 +421,18 @@ export default function DeliveryPage() {
               <span className="font-semibold">${cartTotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Shipping Fee</span>
-              <span className="font-semibold text-blue-600">${shippingFee.toFixed(2)}</span>
+              <span className="text-slate-500 flex items-center gap-1"><Truck className="w-3 h-3" /> Shipping</span>
+              {shippingFee === 0 ? (
+                <span className="font-semibold text-emerald-600">FREE</span>
+              ) : (
+                <span className="font-semibold text-blue-600">${shippingFee.toFixed(2)}</span>
+              )}
             </div>
+            {nearestStoreName && (
+              <p className="text-[10px] text-slate-400">
+                Nearest store: {nearestStoreName} · {shippingFee === 0 ? 'Within free zone' : `${shippingConfig.freeRadiusKm}km free + $${shippingConfig.pricePerKm}/km`}
+              </p>
+            )}
             <div className="border-t border-slate-100 pt-2 flex justify-between">
               <span className="text-sm font-bold">Grand Total</span>
               <span className="text-lg font-extrabold text-blue-600">${grandTotal.toFixed(2)} USDC</span>

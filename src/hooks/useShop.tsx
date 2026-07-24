@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { STORE_LOCATIONS } from '../data/storeLocations';
 
 export interface Product {
   id: string;
@@ -51,6 +52,46 @@ export function generateOrderCode(): string {
 }
 
 export const MERCHANT_ADDRESS = '0x363700d10ca9c4809ad7034f5b21650a9a5e34bd';
+
+// Shipping configuration
+export interface ShippingConfig {
+  freeRadiusKm: number;    // Free shipping radius in km
+  pricePerKm: number;      // Price per km beyond free radius
+  maxFee: number;          // Maximum shipping fee cap
+}
+
+const DEFAULT_SHIPPING_CONFIG: ShippingConfig = {
+  freeRadiusKm: 10,
+  pricePerKm: 0.1,
+  maxFee: 10,
+};
+
+export function getShippingConfig(): ShippingConfig {
+  try {
+    const saved = localStorage.getItem('coffeehouse_shipping_config');
+    return saved ? { ...DEFAULT_SHIPPING_CONFIG, ...JSON.parse(saved) } : DEFAULT_SHIPPING_CONFIG;
+  } catch { return DEFAULT_SHIPPING_CONFIG; }
+}
+
+export function saveShippingConfig(config: ShippingConfig) {
+  localStorage.setItem('coffeehouse_shipping_config', JSON.stringify(config));
+}
+
+export function calcShippingFeeFromConfig(lat: number, lng: number, config?: ShippingConfig): number {
+  const cfg = config || getShippingConfig();
+  let minKm = Infinity;
+  for (const store of STORE_LOCATIONS) {
+    const R = 6371;
+    const dLat = ((lat - store.lat) * Math.PI) / 180;
+    const dLng = ((lng - store.lng) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos((store.lat * Math.PI) / 180) * Math.cos((lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+    const km = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    if (km < minKm) minKm = km;
+  }
+  if (minKm <= cfg.freeRadiusKm) return 0;
+  const extraKm = minKm - cfg.freeRadiusKm;
+  return Math.min(cfg.maxFee, Math.round(extraKm * cfg.pricePerKm * 100) / 100);
+}
 
 
 const PRODUCTS: Product[] = [
