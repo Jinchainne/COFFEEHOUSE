@@ -12,21 +12,17 @@ function shortenAddress(addr: string) {
 const WALLET_LOGOS: Record<string, string> = {
   MetaMask: '/wallets/metamask.jpe',
   'Coinbase Wallet': '/wallets/coinbase.png',
-  WalletConnect: '/wallets/walletconnect.png',
   OKX: '/wallets/okx.png',
-  Rabby: '/wallets/rabby.jpe',
+  Rabby: '/wallets/rabby.png',
   'Binance Wallet': '/wallets/binance.png',
-  Injected: '/wallets/binance.png',
 };
 
 const WALLET_DESC: Record<string, string> = {
   MetaMask: 'Browser extension wallet',
   'Coinbase Wallet': 'Coinbase mobile or extension',
-  WalletConnect: 'Scan QR with any mobile wallet',
   OKX: 'OKX Web3 wallet extension',
   Rabby: 'Rabby browser extension',
   'Binance Wallet': 'Binance Web3 wallet',
-  Injected: 'Browser injected wallet',
 };
 
 function WalletLogo({ name, size = 44 }: { name: string; size?: number }) {
@@ -145,19 +141,23 @@ export default function WalletConnect() {
           </div>
 
           <div className="px-6 pb-4 space-y-2">
-            {connectors.map(connector => (
-              <button key={connector.uid}
-                onClick={() => { connect({ connector }); }}
-                disabled={isPending}
-                className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left group">
-                <WalletLogo name={connector.name} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900">{connector.name}</p>
-                  <p className="text-[11px] text-slate-400">{WALLET_DESC[connector.name] || 'Connect wallet'}</p>
-                </div>
-                {isPending && <Loader2 className="w-4 h-4 text-blue-500 animate-spin flex-shrink-0" />}
-              </button>
-            ))}
+            {connectors.map(connector => {
+              // Rename "Injected" to "Binance Wallet" for display
+              const displayName = connector.name === 'Injected' ? 'Binance Wallet' : connector.name;
+              return (
+                <button key={connector.uid}
+                  onClick={() => { connect({ connector }); }}
+                  disabled={isPending}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left group">
+                  <WalletLogo name={displayName} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-900">{displayName}</p>
+                    <p className="text-[11px] text-slate-400">{WALLET_DESC[displayName] || 'Connect wallet'}</p>
+                  </div>
+                  {isPending && <Loader2 className="w-4 h-4 text-blue-500 animate-spin flex-shrink-0" />}
+                </button>
+              );
+            })}
           </div>
 
           <div className="px-6 pb-6 flex items-center gap-2 justify-center">
