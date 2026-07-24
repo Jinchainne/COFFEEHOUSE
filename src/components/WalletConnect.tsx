@@ -8,16 +8,15 @@ function shortenAddress(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-// Wallet logo files (local PNGs)
+// Wallet logos - real CDN icons
 const WALLET_LOGOS: Record<string, string> = {
-  MetaMask: '/wallets/metamask.png',
-  'Coinbase Wallet': '/wallets/coinbase.png',
-  WalletConnect: '/wallets/walletconnect.png',
-  OKX: '/wallets/okx.png',
-  Rabby: '/wallets/rabby.png',
-  'Binance Wallet': '/wallets/binance.png',
-  'Base Account': '/wallets/base.png',
-  Injected: '/wallets/injected.png',
+  MetaMask: 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg',
+  'Coinbase Wallet': 'https://cdn.worldvectorlogo.com/logos/coinbase-1.svg',
+  WalletConnect: 'https://cdn.worldvectorlogo.com/logos/walletconnect-logo.svg',
+  OKX: 'https://static.okx.com/cdn/assets/imgs/221/5F7A0B6A3D10A8D3.png',
+  Rabby: 'https://assets.rabby.io/rabby-extension/assets/rabby-logo.svg',
+  'Binance Wallet': 'https://cdn.worldvectorlogo.com/logos/binance-logo.svg',
+  Injected: 'https://cdn-icons-png.flaticon.com/512/6295/6295417.png',
 };
 
 const WALLET_DESC: Record<string, string> = {
@@ -27,7 +26,6 @@ const WALLET_DESC: Record<string, string> = {
   OKX: 'OKX Web3 wallet extension',
   Rabby: 'Rabby browser extension',
   'Binance Wallet': 'Binance Web3 wallet',
-  'Base Account': 'Base network wallet',
   Injected: 'Browser injected wallet',
 };
 
