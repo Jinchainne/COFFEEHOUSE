@@ -8,46 +8,6 @@ function shortenAddress(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-// Wallet logos - real CDN icons
-const WALLET_LOGOS: Record<string, string> = {
-  MetaMask: '/wallets/metamask.jpg',
-  'Coinbase Wallet': '/wallets/coinbase.png',
-  OKX: '/wallets/okx.png',
-  Rabby: '/wallets/rabby.png',
-  'Binance Wallet': '/wallets/binance.png',
-};
-
-const WALLET_DESC: Record<string, string> = {
-  MetaMask: 'Browser extension wallet',
-  'Coinbase Wallet': 'Coinbase mobile or extension',
-  OKX: 'OKX Web3 wallet extension',
-  Rabby: 'Rabby browser extension',
-  'Binance Wallet': 'Binance Web3 wallet',
-};
-
-function WalletLogo({ name, size = 44 }: { name: string; size?: number }) {
-  const logoUrl = WALLET_LOGOS[name];
-  if (logoUrl) {
-    return (
-      <div style={{ width: size, height: size }} className="rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center">
-        <img src={logoUrl} alt={name} className="w-full h-full object-contain"
-          onError={(e) => {
-            const t = e.target as HTMLImageElement;
-            t.style.display = 'none';
-            const p = t.parentElement;
-            if (p) p.innerHTML = `<span style="font-size:${size * 0.45}px;font-weight:bold;color:#94a3b8">${name.charAt(0)}</span>`;
-          }} />
-      </div>
-    );
-  }
-  return (
-    <div style={{ width: size, height: size }} className="rounded-xl bg-slate-100 flex items-center justify-center">
-      <span className="text-xl font-bold text-slate-500">{name.charAt(0)}</span>
-    </div>
-  );
-}
-
-// Force add + switch to Arc Testnet
 async function forceSwitchToArc() {
   const ethereum = (window as any).ethereum;
   if (!ethereum) return;
@@ -123,60 +83,21 @@ export default function WalletConnect() {
 
   const isWrongChain = isConnected && chain && chain.id !== arcTestnet.id;
 
-  // ═══════ WALLET SELECTOR MODAL ═══════
-  if (showModal) {
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-          <div className="px-6 pt-6 pb-4 text-center relative">
-            <button onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded-lg">
-              <X className="w-5 h-5 text-slate-400" />
-            </button>
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-200">
-              <Wallet className="w-7 h-7 text-white" />
-            </div>
-            <h2 className="text-xl font-extrabold text-slate-900">Log in or sign up</h2>
-            <p className="text-sm text-slate-400 mt-1">Connect wallet to pay with USDC on Arc Testnet</p>
-          </div>
-
-          <div className="px-6 pb-4 space-y-2">
-            {connectors.map(connector => {
-              // Rename "Injected" to "Binance Wallet" for display
-              const displayName = connector.name === 'Injected' ? 'Binance Wallet' : connector.name;
-              return (
-                <button key={connector.uid}
-                  onClick={() => { connect({ connector }); }}
-                  disabled={isPending}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all text-left group">
-                  <WalletLogo name={displayName} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-900">{displayName}</p>
-                    <p className="text-[11px] text-slate-400">{WALLET_DESC[displayName] || 'Connect wallet'}</p>
-                  </div>
-                  {isPending && <Loader2 className="w-4 h-4 text-blue-500 animate-spin flex-shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="px-6 pb-6 flex items-center gap-2 justify-center">
-            <div className="w-4 h-4 rounded bg-emerald-100 flex items-center justify-center">
-              <Check className="w-3 h-3 text-emerald-600" />
-            </div>
-            <p className="text-[11px] text-slate-400">
-              By connecting, you agree to our <span className="text-blue-500 underline cursor-pointer">Terms of Service</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Direct connect - no modal, just try to connect
+  const handleConnect = () => {
+    // Try injected connector first (most common)
+    const injectedConnector = connectors.find(c => c.id === 'injected');
+    if (injectedConnector) {
+      connect({ connector: injectedConnector });
+    } else if (connectors.length > 0) {
+      connect({ connector: connectors[0] });
+    }
+  };
 
   // ═══════ NOT CONNECTED ═══════
   if (!isConnected) {
     return (
-      <button onClick={() => setShowModal(true)}
+      <button onClick={handleConnect}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-sm font-semibold shadow-md shadow-blue-200 transition-all hover:shadow-lg hover:-translate-y-0.5">
         <Wallet className="w-4 h-4" />
         Connect Wallet
