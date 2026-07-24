@@ -11,24 +11,31 @@ import { Check, MapPin, Truck, ArrowLeft, QrCode, Loader2, AlertCircle, Wallet }
 import PaymentReceipt from '../../components/PaymentReceipt';
 // Poll merchant USDC balance via RPC
 async function fetchUSDCBalance(address: string): Promise<number> {
-  try {
-    const rpcUrl = 'https://rpc.testnet.arc.network';
-    // balanceOf(address) selector: 0x70a08231
-    const data = `0x70a08231000000000000000000000000${address.slice(2).toLowerCase()}`;
-    const resp = await fetch(rpcUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0', id: 1, method: 'eth_call',
-        params: [{ to: '0x3600000000000000000000000000000000000000', data }, 'latest']
-      })
-    });
-    const json = await resp.json();
-    if (json.result) {
-      const raw = BigInt(json.result);
-      return Number(raw) / 1e6; // USDC has 6 decimals
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const rpcUrl = 'https://rpc.testnet.arc.network';
+      const data = `0x70a08231000000000000000000000000${address.slice(2).toLowerCase()}`;
+      const resp = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0', id: 1, method: 'eth_call',
+          params: [{ to: '0x3600000000000000000000000000000000000000', data }, 'latest']
+        })
+      });
+      const json = await resp.json();
+      if (json.result) {
+        const raw = BigInt(json.result);
+        return Number(raw) / 1e6;
+      }
+      if (json.error?.code === -32011) {
+        await new Promise(r => setTimeout(r, 2000 * (attempt + 1))); // backoff on rate limit
+        continue;
+      }
+    } catch {
+      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
     }
-  } catch {}
+  }
   return 0;
 }
 
@@ -133,7 +140,7 @@ export default function POSCheckout() {
     const baseline = await fetchUSDCBalance(MERCHANT_ADDRESS);
     baselineRef.current = baseline;
 
-    // Start polling every 3 seconds
+    // Start polling every 8 seconds (reduced from 3s to avoid RPC rate limit)
     pollRef.current = setInterval(async () => {
       const currentBalance = await fetchUSDCBalance(MERCHANT_ADDRESS);
       const diff = currentBalance - baselineRef.current;
@@ -166,7 +173,7 @@ export default function POSCheckout() {
 
         setTimeout(() => setStep('done'), 1500);
       }
-    }, 3000);
+    }, 8000);
 
     // Timer for elapsed time display
     timerRef.current = setInterval(() => {
