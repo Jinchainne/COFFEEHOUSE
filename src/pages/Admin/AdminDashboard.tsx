@@ -274,18 +274,18 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Vietnamese Tax Info */}
+            {/* Tax Reference Info */}
             <div className="card p-6">
-              <h3 className="text-sm font-bold text-slate-900 mb-4">Vietnam Tax Reference Table</h3>
+              <h3 className="text-sm font-bold text-slate-900 mb-4">Tax Reference Table</h3>
               <div className="space-y-2 text-sm">
-                <TaxRow name="VAT (Thuế GTGT)" rate="10%" desc="Standard rate for goods/services" />
+                <TaxRow name="VAT" rate="10%" desc="Standard rate for goods/services" />
                 <TaxRow name="Corporate Income Tax" rate="20%" desc="Corporate income tax" />
-                <TaxRow name="Personal Income Tax" rate="5%-35%" desc="Progressive, 5% for income ≤ 5M VND/month" />
-                <TaxRow name="License Fee" rate="1-3M VND/year" desc="Based on registered capital" />
+                <TaxRow name="Personal Income Tax" rate="5%-35%" desc="Progressive, 5% for income ≤ $215/month" />
+                <TaxRow name="License Fee" rate="$43-$129/year" desc="Based on registered capital" />
                 <TaxRow name="Social Insurance (Employer)" rate="17.5%" desc="Social insurance (employer)" />
                 <TaxRow name="Social Insurance (Employee)" rate="10.5%" desc="Social insurance (employee)" />
-                <TaxRow name="BHYT" rate="4.5%" desc="Health insurance (3%+1.5%)" />
-                <TaxRow name="BHTN" rate="1%" desc="Unemployment insurance" />
+                <TaxRow name="Health Insurance" rate="4.5%" desc="Health insurance (3% + 1.5%)" />
+                <TaxRow name="Unemployment Insurance" rate="1%" desc="Unemployment insurance" />
               </div>
             </div>
           </div>
