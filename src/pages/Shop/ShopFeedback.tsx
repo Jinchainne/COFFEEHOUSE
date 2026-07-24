@@ -140,7 +140,7 @@ export default function ShopFeedback() {
                   className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-200 text-sm focus:border-amber-400 outline-none" />
               </div>
               <select value={filterProduct} onChange={e => setFilterProduct(e.target.value)}
-                className="h-9 px-3 rounded-lg border border-slate-200 text-sm bg-white focus:border-amber-400 outline-none">
+                className="h-9 px-3 min-w-[150px] rounded-lg border border-slate-200 text-sm bg-white focus:border-amber-400 outline-none">
                 <option value="all">All Products</option>
                 {products.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
