@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-07-24T04:16:23.705Z",
+  "updatedAt": "2026-07-24T04:30:03.483Z",
   "products": [
     {
       "id": "sb1",
@@ -368,7 +368,7 @@
       "price": 6.49,
       "category": "Pasta",
       "brand": "Jollibee",
-      "image": "https://i.pinimg.com/736x/ca/18/3b/ca183b54b7121af54e0b665e32884db1.jpg",
+      "image": "(uploaded-image-needs-url)",
       "description": "Rice noodles with garlic shrimp sauce, pork, and egg"
     },
     {
