@@ -7,7 +7,7 @@ import { useSendUSDC, useUSDCBalance } from '../../hooks/useOnChain';
 import { formatCurrency } from '../../utils/format';
 import WalletConnect from '../../components/WalletConnect';
 import { QRCodeSVG } from 'qrcode.react';
-import { Check, MapPin, Truck, ArrowLeft, QrCode, Loader2, AlertCircle, Wallet } from 'lucide-react';
+import { Check, MapPin, Truck, ArrowLeft, QrCode, Loader2, AlertCircle, Wallet, Tag, X as XIcon } from 'lucide-react';
 import PaymentReceipt from '../../components/PaymentReceipt';
 // Poll merchant USDC balance via RPC
 async function fetchUSDCBalance(address: string): Promise<number> {
@@ -46,7 +46,7 @@ type PaymentStatus = 'waiting' | 'detecting' | 'confirmed' | 'timeout';
 export default function POSCheckout() {
   const navigate = useNavigate();
   const { isConnected, address: walletAddress } = useAccount();
-  const { cart, cartTotal, cartCount, clearCart, saveOrder, updateOrderStatus, orders } = useShop();
+  const { cart, cartTotal, cartCount, clearCart, saveOrder, updateOrderStatus, orders, promoCode, promoDiscount, applyPromo, removePromo } = useShop();
   const { processOrder, dispatchDelivery } = useAgent();
   const { send, hash, isSuccess, error: sendError } = useSendUSDC();
   const { balance } = useUSDCBalance();
@@ -56,6 +56,8 @@ export default function POSCheckout() {
   const [orderCode, setOrderCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('waiting');
+  const [promoInput, setPromoInput] = useState('');
+  const [promoMsg, setPromoMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [txHash, setTxHash] = useState('');
   const baselineRef = useRef<number>(0);
@@ -64,7 +66,9 @@ export default function POSCheckout() {
 
   const [delivery, setDelivery] = useState<DeliveryAddress | null>(null);
   const [shippingFee, setShippingFee] = useState(1.5);
-  const grandTotal = cartTotal + shippingFee;
+  const effectiveShipping = promoCode === 'FREESHIP' ? 0 : shippingFee;
+  const effectiveDiscount = promoCode === 'FREESHIP' ? 0 : promoDiscount;
+  const grandTotal = cartTotal - effectiveDiscount + effectiveShipping;
 
   useEffect(() => {
     try {
@@ -246,16 +250,63 @@ export default function POSCheckout() {
               <h3 className="text-sm font-bold mb-3">Items ({cartCount})</h3>
               <div className="space-y-2">
                 {cart.map(item => (
-                  <div key={item.product.id} className="flex items-center gap-3">
+                  <div key={item.product.id + (item.selectedSize || '') + (item.selectedTemp || '')} className="flex items-center gap-3">
                     <img src={item.product.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
                     <div className="flex-1">
                       <p className="text-sm font-semibold">{item.product.name}</p>
-                      <p className="text-xs text-slate-400">x{item.quantity}</p>
+                      <div className="flex items-center gap-1.5">
+                        {item.selectedSize && <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">{item.selectedSize}</span>}
+                        {item.selectedTemp && <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500">{item.selectedTemp}</span>}
+                        <span className="text-xs text-slate-400">x{item.quantity}</span>
+                      </div>
                     </div>
-                    <span className="text-sm font-bold">${(item.product.price * item.quantity).toFixed(2)}</span>
+                    <span className="text-sm font-bold">${((item.unitPrice || item.product.price) * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Promo Code */}
+            <div className="card p-4">
+              <h3 className="text-sm font-bold mb-3">Promo Code</h3>
+              {promoCode ? (
+                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-emerald-600" />
+                    <span className="text-sm font-semibold text-emerald-700">{promoCode}</span>
+                  </div>
+                  <button onClick={() => { removePromo(); setPromoMsg(null); }} className="text-slate-400 hover:text-red-500">
+                    <XIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={e => { setPromoInput(e.target.value); setPromoMsg(null); }}
+                    placeholder="Enter code"
+                    className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!promoInput.trim()) return;
+                      const result = applyPromo(promoInput.trim());
+                      setPromoMsg({ type: result.success ? 'success' : 'error', text: result.message });
+                      if (result.success) setPromoInput('');
+                    }}
+                    className="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )}
+              {promoMsg && (
+                <p className={`text-xs mt-2 ${promoMsg.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {promoMsg.text}
+                </p>
+              )}
+              <p className="text-[10px] text-slate-400 mt-2">Try: WELCOME10, SAVE5, FREESHIP, COFFEE20</p>
             </div>
 
             {/* Total */}
@@ -265,9 +316,17 @@ export default function POSCheckout() {
                   <span className="text-slate-500">Subtotal</span>
                   <span>${cartTotal.toFixed(2)}</span>
                 </div>
+                {effectiveDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500 flex items-center gap-1"><Tag className="w-3 h-3" /> Discount ({promoCode})</span>
+                    <span className="text-emerald-600">-${effectiveDiscount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500 flex items-center gap-1"><Truck className="w-3 h-3" /> Shipping</span>
-                  <span className="text-blue-600">${shippingFee.toFixed(2)}</span>
+                  <span className={effectiveShipping === 0 ? 'text-emerald-600' : 'text-blue-600'}>
+                    {effectiveShipping === 0 ? 'FREE' : `$${effectiveShipping.toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="border-t border-slate-100 pt-2 flex justify-between">
                   <span className="font-bold">Total</span>

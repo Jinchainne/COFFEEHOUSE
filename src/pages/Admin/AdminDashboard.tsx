@@ -618,6 +618,7 @@ function ProductsTab({ products, onAdd, onUpdate, onDelete }: {
               <th className="text-left p-3">Name</th>
               <th className="text-left p-3">Category</th>
               <th className="text-left p-3">Brand</th>
+              <th className="text-center p-3">Stock</th>
               <th className="text-right p-3">Price</th>
               <th className="p-3 w-24">Actions</th>
             </tr>
@@ -666,6 +667,20 @@ function ProductsTab({ products, onAdd, onUpdate, onDelete }: {
                 </td>
                 {/* Brand */}
                 <td className="p-3 text-xs text-slate-500">{p.brand}</td>
+                {/* Stock */}
+                <td className="p-3 text-center">
+                  <button onClick={() => {
+                    const current = p.stock ?? -1;
+                    const input = prompt(`Set stock for "${p.name}"\n-1 = unlimited, 0 = out of stock, >0 = limited`, current.toString());
+                    if (input !== null) { const v = parseInt(input); if (!isNaN(v)) onUpdate(p.id, { stock: v }); }
+                  }} className={`text-xs font-bold px-2 py-1 rounded-full ${
+                    (p.stock ?? -1) === 0 ? 'bg-red-100 text-red-700' :
+                    (p.stock ?? -1) > 0 && p.stock <= 5 ? 'bg-amber-100 text-amber-700' :
+                    'bg-emerald-50 text-emerald-600'
+                  }`} title="Click to edit stock">
+                    {(p.stock ?? -1) === 0 ? 'Out' : (p.stock ?? -1) === -1 ? '∞' : p.stock}
+                  </button>
+                </td>
                 {/* Price */}
                 <td className="p-3 text-right">
                   {editingId === p.id && editField === 'price' ? (

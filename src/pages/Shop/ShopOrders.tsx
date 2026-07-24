@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useShop } from '../../hooks/useShop';
-import { ExternalLink, Clock, Check, X, ShoppingBag, Coffee, MapPin, Truck, Package, ChefHat, Receipt } from 'lucide-react';
+import { ExternalLink, Clock, Check, X, ShoppingBag, Coffee, MapPin, Truck, Package, ChefHat, Receipt, RotateCcw } from 'lucide-react';
 import PaymentReceipt from '../../components/PaymentReceipt';
 
 export default function ShopOrders() {
   const navigate = useNavigate();
-  const { orders } = useShop();
+  const { orders, requestRefund } = useShop();
   const [viewReceipt, setViewReceipt] = useState<string | null>(null);
+  const [refundOrder, setRefundOrder] = useState<string | null>(null);
+  const [refundReason, setRefundReason] = useState('');
 
   const receiptOrder = viewReceipt ? orders.find(o => o.id === viewReceipt) : null;
 
@@ -18,6 +20,7 @@ export default function ShopOrders() {
     shipping: { icon: Truck, color: 'text-purple-500', bg: 'bg-purple-50 border-purple-200', label: 'On the Way' },
     delivered: { icon: Package, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', label: 'Delivered' },
     failed: { icon: X, color: 'text-red-500', bg: 'bg-red-50 border-red-200', label: 'Failed' },
+    refunded: { icon: RotateCcw, color: 'text-orange-500', bg: 'bg-orange-50 border-orange-200', label: 'Refunded' },
   };
 
   return (
@@ -59,11 +62,17 @@ export default function ShopOrders() {
                   {/* Items */}
                   <div className="space-y-1.5 mb-3">
                     {order.items.map(item => (
-                      <div key={item.product.id} className="flex items-center gap-2">
+                      <div key={item.product.id + (item.selectedSize || '') + (item.selectedTemp || '')} className="flex items-center gap-2">
                         <img src={item.product.image} alt={item.product.name} className="w-8 h-8 rounded-lg object-cover" />
-                        <span className="text-xs text-slate-700 flex-1 truncate">{item.product.name}</span>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs text-slate-700 truncate block">{item.product.name}</span>
+                          <div className="flex items-center gap-1">
+                            {item.selectedSize && <span className="text-[9px] px-1 py-0.5 bg-slate-100 rounded text-slate-400">{item.selectedSize}</span>}
+                            {item.selectedTemp && <span className="text-[9px] px-1 py-0.5 bg-slate-100 rounded text-slate-400">{item.selectedTemp}</span>}
+                          </div>
+                        </div>
                         <span className="text-xs text-slate-400">×{item.quantity}</span>
-                        <span className="text-xs font-semibold">${(item.product.price * item.quantity).toFixed(2)}</span>
+                        <span className="text-xs font-semibold">${((item.unitPrice || item.product.price) * item.quantity).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -109,6 +118,12 @@ export default function ShopOrders() {
                           <Receipt className="w-3 h-3" /> Receipt
                         </button>
                       ) : null}
+                      {order.status === 'delivered' && (
+                        <button onClick={() => { setRefundOrder(order.id); setRefundReason(''); }}
+                          className="flex items-center gap-1 text-[10px] font-semibold text-orange-600 hover:text-orange-800 bg-orange-50 px-2 py-1 rounded-lg border border-orange-200">
+                          <RotateCcw className="w-3 h-3" /> Refund
+                        </button>
+                      )}
                       <div className="text-right">
                         <span className="text-sm font-extrabold text-slate-900">${order.total.toFixed(2)} USDC</span>
                         {order.shippingFee > 0 && (
@@ -143,6 +158,41 @@ export default function ShopOrders() {
               className="w-full bg-white text-slate-700 font-semibold text-sm py-3 rounded-xl border border-slate-200 hover:bg-slate-50">
               ← Back to Orders
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Refund Dialog */}
+      {refundOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-extrabold text-slate-900 mb-1">Request Refund</h3>
+            <p className="text-sm text-slate-400 mb-4">Order {refundOrder}</p>
+            <textarea
+              value={refundReason}
+              onChange={e => setRefundReason(e.target.value)}
+              placeholder="Reason for refund..."
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => setRefundOrder(null)}
+                className="flex-1 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (refundReason.trim()) {
+                    requestRefund(refundOrder, refundReason.trim());
+                    setRefundOrder(null);
+                    setRefundReason('');
+                  }
+                }}
+                disabled={!refundReason.trim()}
+                className="flex-1 py-2.5 text-sm font-semibold text-white bg-orange-500 rounded-xl hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Submit Refund
+              </button>
+            </div>
           </div>
         </div>
       )}

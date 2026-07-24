@@ -9,11 +9,19 @@ export interface Product {
   image: string;
   description: string;
   brand: string;
+  // New: variants & inventory
+  sizes?: { label: string; priceAdd: number }[];  // e.g. [{label:'M',priceAdd:0},{label:'L',priceAdd:1}]
+  temperatures?: string[];                         // e.g. ['Hot','Iced']
+  stock?: number;                                   // -1 = unlimited, 0 = out of stock, >0 = limited
+  featured?: boolean;                               // show in featured section
 }
 
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedSize?: string;      // e.g. 'L'
+  selectedTemp?: string;      // e.g. 'Iced'
+  unitPrice?: number;         // price with size modifier
 }
 
 export interface DeliveryAddress {
@@ -28,7 +36,7 @@ export interface Order {
   code: string; // 6-char tracking code e.g. "ARX-K7M2P"
   items: CartItem[];
   total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'shipping' | 'delivered' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'shipping' | 'delivered' | 'cancelled' | 'refunded';
   txHash?: string;
   timestamp: number;
   merchantAddress: string;
@@ -96,15 +104,15 @@ export function calcShippingFeeFromConfig(lat: number, lng: number, config?: Shi
 
 const PRODUCTS: Product[] = [
   // ═══════════ STARBUCKS ═══════════
-  { id: 'sb1', name: 'Caffè Latte', price: 5.75, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop', description: 'Rich espresso topped with steamed milk and a light layer of foam' },
-  { id: 'sb2', name: 'Cappuccino', price: 5.45, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&h=400&fit=crop', description: 'Espresso with steamed milk and a deep layer of foam' },
-  { id: 'sb3', name: 'Caramel Macchiato', price: 6.25, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://i.pinimg.com/736x/06/ed/b5/06edb5e88de8b3e7ef8ba18a7ef83d66.jpg', description: 'Freshly steamed milk with vanilla-flavored syrup and espresso' },
-  { id: 'sb4', name: 'Caffè Mocha', price: 5.95, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=400&h=400&fit=crop', description: 'Espresso with bittersweet mocha sauce and steamed milk' },
-  { id: 'sb5', name: 'Flat White', price: 5.95, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=400&h=400&fit=crop', description: 'Smooth ristretto shots with velvety steamed milk' },
-  { id: 'sb6', name: 'Blonde Vanilla Latte', price: 6.05, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop', description: 'Blonde espresso with vanilla syrup and steamed milk' },
-  { id: 'sb7', name: 'Iced Brown Sugar Oatmilk Shaken Espresso', price: 6.75, category: 'Cold Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&h=400&fit=crop', description: 'Blonde espresso with brown sugar and cinnamon, shaken with oatmilk' },
-  { id: 'sb8', name: 'Cold Brew', price: 4.75, category: 'Cold Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop', description: 'Slow-steeped, super-smooth cold coffee served over ice' },
-  { id: 'sb9', name: 'Iced Caramel Macchiato', price: 6.45, category: 'Cold Coffee', brand: 'Starbucks', image: 'https://www.starbucks.co.nz/content/menu/0664253001647830363.jpg', description: 'Espresso poured over cold milk with vanilla and caramel drizzle' },
+  { id: 'sb1', name: 'Caffè Latte', price: 5.75, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop', description: 'Rich espresso topped with steamed milk and a light layer of foam', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Hot','Iced'], stock: -1 },
+  { id: 'sb2', name: 'Cappuccino', price: 5.45, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&h=400&fit=crop', description: 'Espresso with steamed milk and a deep layer of foam', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Hot','Iced'], stock: -1 },
+  { id: 'sb3', name: 'Caramel Macchiato', price: 6.25, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://i.pinimg.com/736x/06/ed/b5/06edb5e88de8b3e7ef8ba18a7ef83d66.jpg', description: 'Freshly steamed milk with vanilla-flavored syrup and espresso', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1.5}], temperatures: ['Hot','Iced'], stock: -1 },
+  { id: 'sb4', name: 'Caffè Mocha', price: 5.95, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=400&h=400&fit=crop', description: 'Espresso with bittersweet mocha sauce and steamed milk', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Hot','Iced'], stock: -1 },
+  { id: 'sb5', name: 'Flat White', price: 5.95, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=400&h=400&fit=crop', description: 'Smooth ristretto shots with velvety steamed milk', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Hot'], stock: -1 },
+  { id: 'sb6', name: 'Blonde Vanilla Latte', price: 6.05, category: 'Hot Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop', description: 'Blonde espresso with vanilla syrup and steamed milk', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Hot','Iced'], stock: -1 },
+  { id: 'sb7', name: 'Iced Brown Sugar Oatmilk Shaken Espresso', price: 6.75, category: 'Cold Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&h=400&fit=crop', description: 'Blonde espresso with brown sugar and cinnamon, shaken with oatmilk', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Iced'], stock: -1 },
+  { id: 'sb8', name: 'Cold Brew', price: 4.75, category: 'Cold Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop', description: 'Slow-steeped, super-smooth cold coffee served over ice', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Iced'], stock: -1 },
+  { id: 'sb9', name: 'Iced Caramel Macchiato', price: 6.45, category: 'Cold Coffee', brand: 'Starbucks', image: 'https://www.starbucks.co.nz/content/menu/0664253001647830363.jpg', description: 'Espresso poured over cold milk with vanilla and caramel drizzle', sizes: [{label:'M',priceAdd:0},{label:'L',priceAdd:1}], temperatures: ['Iced'], stock: -1 },
   { id: 'sb10', name: 'Mocha Frappuccino', price: 5.95, category: 'Cold Coffee', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&h=400&fit=crop', description: 'Coffee blended with mocha sauce, milk and ice' },
   { id: 'sb11', name: 'Matcha Latte', price: 5.75, category: 'Tea', brand: 'Starbucks', image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&h=400&fit=crop', description: 'Smooth and creamy matcha sweetened just right and served with milk' },
   { id: 'sb12', name: 'Chai Latte', price: 5.45, category: 'Tea', brand: 'Starbucks', image: 'https://cdn7.kiwilimon.com/recetaimagen/40439/960x640/53801.jpg.jpg', description: 'Black tea infused with cinnamon, clove and other warming spices' },
@@ -228,7 +236,7 @@ interface ShopCtx {
   orders: Order[];
   cartTotal: number;
   cartCount: number;
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, size?: string, temp?: string) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -236,9 +244,18 @@ interface ShopCtx {
   updateOrderStatus: (orderId: string, status: Order['status'], txHash?: string) => void;
   getOrderByCode: (code: string) => Order | undefined;
   cancelOrder: (orderId: string, reason: string) => void;
+  requestRefund: (orderId: string, reason: string) => void;
   addProduct: (product: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
+  // Promo
+  applyPromo: (code: string) => { success: boolean; message: string; discount: number };
+  removePromo: () => void;
+  promoCode: string;
+  promoDiscount: number;
+  // Recently viewed
+  recentlyViewed: string[];
+  addRecentlyViewed: (productId: string) => void;
 }
 
 const ShopContext = createContext<ShopCtx | null>(null);
@@ -306,17 +323,40 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     persistProducts(products.filter(p => p.id !== id));
   }, [products, persistProducts]);
 
-  const addToCart = useCallback((product: Product) => {
+  const addToCart = useCallback((product: Product, size?: string, temp?: string) => {
+    // Check stock
+    if (product.stock === 0) return;
+    // Calculate unit price with size modifier
+    let unitPrice = product.price;
+    if (size && product.sizes) {
+      const sizeDef = product.sizes.find(s => s.label === size);
+      if (sizeDef) unitPrice += sizeDef.priceAdd;
+    }
     setCart(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
+      // Match by product id + size + temp
+      const existing = prev.find(item =>
+        item.product.id === product.id &&
+        item.selectedSize === (size || undefined) &&
+        item.selectedTemp === (temp || undefined)
+      );
       if (existing) {
         return prev.map(item =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item === existing ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, {
+        product,
+        quantity: 1,
+        selectedSize: size || undefined,
+        selectedTemp: temp || undefined,
+        unitPrice,
+      }];
     });
-  }, []);
+    // Decrease stock if limited
+    if (product.stock && product.stock > 0) {
+      updateProduct(product.id, { stock: product.stock - 1 });
+    }
+  }, [updateProduct]);
 
   const removeFromCart = useCallback((productId: string) => {
     setCart(prev => prev.filter(item => item.product.id !== productId));
@@ -334,8 +374,72 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => setCart([]), []);
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const cartTotal = cart.reduce((sum, item) => sum + (item.unitPrice || item.product.price) * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Promo code system
+  const [promoCode, setPromoCode] = useState(() => {
+    try { return localStorage.getItem('coffeehouse_promo_code') || ''; } catch { return ''; }
+  });
+  const [promoDiscount, setPromoDiscount] = useState(() => {
+    try { return parseFloat(localStorage.getItem('coffeehouse_promo_discount') || '0'); } catch { return 0; }
+  });
+
+  const PROMO_CODES: Record<string, { type: 'percent' | 'fixed' | 'freeship'; value: number; minOrder?: number }> = {
+    'WELCOME10': { type: 'percent', value: 10 },
+    'SAVE5': { type: 'fixed', value: 5, minOrder: 20 },
+    'FREESHIP': { type: 'freeship', value: 0 },
+    'COFFEE20': { type: 'percent', value: 20, minOrder: 15 },
+  };
+
+  const applyPromo = useCallback((code: string): { success: boolean; message: string; discount: number } => {
+    const upper = code.toUpperCase().trim();
+    const promo = PROMO_CODES[upper];
+    if (!promo) return { success: false, message: 'Invalid promo code', discount: 0 };
+    if (promo.minOrder && cartTotal < promo.minOrder) {
+      return { success: false, message: `Minimum order $${promo.minOrder.toFixed(2)} required`, discount: 0 };
+    }
+    let discount = 0;
+    if (promo.type === 'percent') discount = cartTotal * promo.value / 100;
+    else if (promo.type === 'fixed') discount = promo.value;
+    setPromoCode(upper);
+    setPromoDiscount(discount);
+    localStorage.setItem('coffeehouse_promo_code', upper);
+    localStorage.setItem('coffeehouse_promo_discount', discount.toString());
+    return { success: true, message: promo.type === 'freeship' ? 'Free shipping applied!' : `$${discount.toFixed(2)} discount applied!`, discount };
+  }, [cartTotal]);
+
+  const removePromo = useCallback(() => {
+    setPromoCode('');
+    setPromoDiscount(0);
+    localStorage.removeItem('coffeehouse_promo_code');
+    localStorage.removeItem('coffeehouse_promo_discount');
+  }, []);
+
+  // Recently viewed
+  const [recentlyViewed, setRecentlyViewed] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('coffeehouse_recently_viewed');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  const addRecentlyViewed = useCallback((productId: string) => {
+    setRecentlyViewed(prev => {
+      const updated = [productId, ...prev.filter(id => id !== productId)].slice(0, 20);
+      localStorage.setItem('coffeehouse_recently_viewed', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  // Refund request
+  const requestRefund = useCallback((orderId: string, reason: string) => {
+    setOrders(prev => {
+      const updated = prev.map(o => o.id === orderId ? { ...o, status: 'refunded' as const, cancelReason: reason, cancelledAt: Date.now() } : o);
+      localStorage.setItem('arcbank_orders', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   const saveOrder = useCallback((order: Order) => {
     setOrders(prev => {
@@ -374,8 +478,10 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     <ShopContext.Provider value={{
       products, categories: CATEGORIES, brands: BRANDS, cart, orders,
       cartTotal, cartCount, addToCart, removeFromCart, updateQuantity,
-      clearCart, saveOrder, updateOrderStatus, getOrderByCode, cancelOrder,
+      clearCart, saveOrder, updateOrderStatus, getOrderByCode, cancelOrder, requestRefund,
       addProduct, updateProduct, deleteProduct,
+      applyPromo, removePromo, promoCode, promoDiscount,
+      recentlyViewed, addRecentlyViewed,
     }}>
       {children}
     </ShopContext.Provider>

@@ -4,26 +4,28 @@ import { Bell, Coffee, Menu, X, ClipboardList, Shield, MapPin, ShoppingCart, Mes
 import WalletConnect from './WalletConnect';
 import { useShop } from '../hooks/useShop';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../i18n';
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { cartCount } = useShop();
   const navigate = useNavigate();
+  const { t, lang, toggleLang } = useTranslation();
 
   const navItems = [
-    { label: 'Menu', path: '/shop', icon: Coffee },
-    { label: 'Orders', path: '/shop/orders', icon: ClipboardList },
-    { label: 'Track', path: '/shop/track', icon: MapPin },
-    { label: 'Feedback', path: '/shop/feedback', icon: MessageSquare },
-    { label: 'Admin', path: '/admin', icon: Shield },
+    { label: t('nav.menu'), path: '/shop', icon: Coffee },
+    { label: t('nav.orders'), path: '/shop/orders', icon: ClipboardList },
+    { label: t('nav.track'), path: '/shop/track', icon: MapPin },
+    { label: t('nav.feedback'), path: '/shop/feedback', icon: MessageSquare },
+    { label: t('nav.admin'), path: '/admin', icon: Shield },
   ];
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       {/* Top bar */}
       <div className="bg-slate-900 text-white text-center py-1.5 text-[11px]">
-        <span className="text-slate-400">Official e-commerce site · </span>
-        <span className="font-semibold">Pay with USDC on Arc Testnet</span>
+        <span className="text-slate-400">{t('banner.official')}</span>
+        <span className="font-semibold">{t('banner.payWith')}</span>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -53,6 +55,15 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <button
+              onClick={toggleLang}
+              className="px-2 py-1 text-[10px] font-bold text-slate-500 hover:text-amber-700 hover:bg-amber-50 rounded-md border border-slate-200 transition-colors"
+              title={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang English'}
+            >
+              {lang === 'en' ? 'EN' : 'VI'}
+            </button>
+
             <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 relative">
               <Bell className="w-4 h-4" />
               <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-red-500" />
