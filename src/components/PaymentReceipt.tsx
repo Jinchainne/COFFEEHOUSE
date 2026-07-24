@@ -44,8 +44,8 @@ export default function PaymentReceipt({ order, txHash, onClose, onTrack }: Prop
 
           {/* Shop Header with Logo */}
           <div className="p-5 border-b border-dashed border-slate-200 relative">
-            <img src="/logo.png" alt="COFFEE HOUSE" className="absolute top-3 right-3 w-14 h-14 object-contain rounded-lg opacity-90" />
-            <div className="text-center pr-16">
+            <img src="/logo.png" alt="COFFEE HOUSE" className="absolute top-3 right-3 w-28 h-28 object-contain rounded-xl opacity-90" />
+            <div className="text-center pr-28">
               <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">COFFEE HOUSE</h2>
               <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em]">The Coffee of the World</p>
               <p className="text-[11px] text-slate-400 mt-1">Pay with USDC on Arc Testnet</p>
